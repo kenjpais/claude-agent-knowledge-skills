@@ -179,6 +179,36 @@ The system enforces strict constraints for agent-optimized documentation:
 
 ## Integration Points
 
+### GitHub & JIRA Data Storage ⭐
+Efficient single-repository ingestion using GitHub GraphQL API with date range filtering:
+- **GitHub**: PRs and issues within specified date range (default: past year)
+- **JIRA**: Automatic extraction and correlation of JIRA references
+- **Storage**: Local SQLite database for fast queries
+- **Date Filtering**: Flexible date ranges (YYYY-MM-DD or "N-days-ago")
+
+**Quick Usage**:
+```bash
+# Ingest last year of data (default)
+python integrations/storage/ingest.py openshift/installer --jira OCPCLOUD
+
+# Ingest specific date range
+python integrations/storage/ingest.py openshift/installer \
+  --since 2024-01-01 \
+  --until 2024-12-31
+
+# Ingest last 90 days
+python integrations/storage/ingest.py openshift/installer \
+  --since 90-days-ago
+```
+
+**Benefits**:
+- ✅ 50-100x fewer API requests vs REST (uses GraphQL)
+- ✅ Date range filtering for targeted analysis
+- ✅ Automatic GitHub ↔ JIRA correlation
+- ✅ Local SQLite storage (~10MB per repo)
+
+**See**: `integrations/storage/README.md` for complete documentation
+
 ### GitHub MCP Server ✅
 Extract architectural context from:
 - Pull request descriptions and reviews

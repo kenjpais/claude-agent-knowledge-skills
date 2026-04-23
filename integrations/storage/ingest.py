@@ -46,6 +46,10 @@ def ingest_repository_full(
     if until_date is None:
         until_date = datetime.now()
 
+    # Validate date range
+    if since_date > until_date:
+        raise ValueError(f"since_date ({since_date.date()}) must be before until_date ({until_date.date()})")
+
     print("=" * 60)
     print(f"🚀 FULL INGESTION: {owner}/{repo}")
     print("=" * 60)

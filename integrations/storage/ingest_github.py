@@ -5,12 +5,11 @@ Fetches PRs, issues within a date range and extracts JIRA references.
 """
 
 import re
-import os
 import sys
 import json
 import subprocess
 from typing import List, Dict, Set, Optional
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Add parent directory to path
@@ -72,7 +71,13 @@ class JiraKeyExtractor:
 
         results = []
         for match in cls.JIRA_PATTERN.finditer(text):
-            key = f"{match.group(1)}-{match.group(2)}"
+            prefix = match.group(1)
+            number = match.group(2)
+            key = f"{prefix}-{number}"
+
+            # Filter out common false positives (same as extract method)
+            if prefix in ['PR', 'GO', 'HTTP', 'HTTPS', 'SHA', 'API', 'AWS', 'GCP']:
+                continue
 
             # Extract context around the match
             start = max(0, match.start() - context_chars)
@@ -235,15 +240,33 @@ class GitHubGraphQLIngester:
         """
         # Default to past year
         if since_date is None:
-            since_date = datetime.now() - timedelta(days=365)
+            since_date = datetime.now(timezone.utc) - timedelta(days=365)
         if until_date is None:
-            until_date = datetime.now()
+            until_date = datetime.now(timezone.utc)
+
+        # Ensure dates are timezone-aware (convert to UTC if naive)
+        if since_date.tzinfo is None:
+            since_date = since_date.replace(tzinfo=timezone.utc)
+        if until_date.tzinfo is None:
+            until_date = until_date.replace(tzinfo=timezone.utc)
+
+        # Validate date range
+        if since_date > until_date:
+            raise ValueError(f"since_date ({since_date.date()}) must be before until_date ({until_date.date()})")
 
         print(f"🔍 Ingesting pull requests: {owner}/{repo}")
         print(f"   Date range: {since_date.date()} to {until_date.date()}")
 
-        # Ensure repository exists
-        repo_id = self.ingest_repository(owner, repo)
+        # Get repository ID (avoid re-ingesting if possible)
+        # Check if repo already exists in DB
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT repo_id FROM github_repositories WHERE owner = ? AND name = ?",
+                (owner, repo)
+            )
+            result = cursor.fetchone()
+            repo_id = result[0] if result else self.ingest_repository(owner, repo)
 
         query = """
         query($owner: String!, $repo: String!, $cursor: String) {
@@ -382,15 +405,33 @@ class GitHubGraphQLIngester:
         """
         # Default to past year
         if since_date is None:
-            since_date = datetime.now() - timedelta(days=365)
+            since_date = datetime.now(timezone.utc) - timedelta(days=365)
         if until_date is None:
-            until_date = datetime.now()
+            until_date = datetime.now(timezone.utc)
+
+        # Ensure dates are timezone-aware (convert to UTC if naive)
+        if since_date.tzinfo is None:
+            since_date = since_date.replace(tzinfo=timezone.utc)
+        if until_date.tzinfo is None:
+            until_date = until_date.replace(tzinfo=timezone.utc)
+
+        # Validate date range
+        if since_date > until_date:
+            raise ValueError(f"since_date ({since_date.date()}) must be before until_date ({until_date.date()})")
 
         print(f"🐛 Ingesting issues: {owner}/{repo}")
         print(f"   Date range: {since_date.date()} to {until_date.date()}")
 
-        # Ensure repository exists
-        repo_id = self.ingest_repository(owner, repo)
+        # Get repository ID (avoid re-ingesting if possible)
+        # Check if repo already exists in DB
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT repo_id FROM github_repositories WHERE owner = ? AND name = ?",
+                (owner, repo)
+            )
+            result = cursor.fetchone()
+            repo_id = result[0] if result else self.ingest_repository(owner, repo)
 
         query = """
         query($owner: String!, $repo: String!, $cursor: String) {
@@ -601,17 +642,28 @@ class GitHubGraphQLIngester:
 
         # Default to past year
         if since_date is None:
-            since_date = datetime.now() - timedelta(days=365)
+            since_date = datetime.now(timezone.utc) - timedelta(days=365)
         if until_date is None:
-            until_date = datetime.now()
+            until_date = datetime.now(timezone.utc)
+
+        # Ensure dates are timezone-aware (convert to UTC if naive)
+        if since_date.tzinfo is None:
+            since_date = since_date.replace(tzinfo=timezone.utc)
+        if until_date.tzinfo is None:
+            until_date = until_date.replace(tzinfo=timezone.utc)
+
+        # Validate date range
+        if since_date > until_date:
+            raise ValueError(f"since_date ({since_date.date()}) must be before until_date ({until_date.date()})")
 
         print(f"📅 Date range: {since_date.date()} to {until_date.date()}\n")
 
         stats = {}
 
         try:
-            # Repository metadata
-            stats['repo_id'] = self.ingest_repository(owner, repo)
+            # Repository metadata (ingest once, will be reused)
+            repo_id = self.ingest_repository(owner, repo)
+            stats['repo_id'] = repo_id
 
             # Pull requests
             stats['prs'] = self.ingest_pull_requests(
