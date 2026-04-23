@@ -1,26 +1,18 @@
 # GitHub and JIRA Data Storage & Retrieval
 
-This system ingests GitHub and JIRA data using MCP servers, stores it in a local SQLite database, and maintains correlations between GitHub items (PRs, issues, commits) and JIRA issues.
+This system ingests GitHub and JIRA data for a **single repository** using GitHub GraphQL API, stores it in a local SQLite database, and maintains correlations between GitHub items (PRs, issues) and JIRA issues.
 
 ---
 
 ## 🎯 Features
 
-✅ **GitHub Ingestion** - PRs, issues, commits via GitHub MCP server  
+✅ **GitHub GraphQL API** - Efficient data ingestion with pagination  
+✅ **Date Range Filtering** - Ingest data from specific time periods (default: past year)  
 ✅ **JIRA Ingestion** - Issues via JIRA MCP server or public API  
 ✅ **Automatic Correlation** - Extracts JIRA keys from GitHub data  
 ✅ **Local SQLite Storage** - Lightweight, no external database required  
 ✅ **Fast Retrieval** - Indexed queries for agent use  
 ✅ **Relationship Tracking** - Links GitHub PRs to JIRA issues  
-✅ **Parallel Batch Ingestion** - Process multiple repos efficiently  
-✅ **Incremental Updates** - Keep data fresh without re-ingesting  
-
----
-
-## 📖 Documentation
-
-- **[EFFICIENT_INGESTION_GUIDE.md](EFFICIENT_INGESTION_GUIDE.md)** - **⭐ For ingesting ALL OpenShift repositories** (recommended for production)
-- **This README** - Single repository ingestion and basic usage
 
 ---
 
@@ -36,11 +28,22 @@ This system ingests GitHub and JIRA data using MCP servers, stores it in a local
 ### 2. Ingest Repository Data
 
 ```bash
-# Unified ingestion (GitHub + JIRA)
+# Ingest last year of data (default)
 python integrations/storage/ingest.py openshift/installer --jira OCPCLOUD
 
+# Ingest specific date range
+python integrations/storage/ingest.py openshift/installer \
+  --since 2024-01-01 \
+  --until 2024-12-31 \
+  --jira OCPCLOUD
+
+# Ingest last 90 days
+python integrations/storage/ingest.py openshift/installer \
+  --since 90-days-ago \
+  --jira OCPCLOUD
+
 # This will:
-# 1. Fetch GitHub PRs, issues, commits
+# 1. Fetch GitHub PRs and issues within date range
 # 2. Extract JIRA references (e.g., OCPCLOUD-123)
 # 3. Fetch referenced JIRA issues
 # 4. Store everything in database
@@ -98,34 +101,36 @@ print(f"PRs: {stats['github_prs']}, JIRA issues: {stats['jira_issues']}")
 
 ## 🔧 Usage
 
-### Unified Ingestion (Recommended)
+### Date Range Options
 
 ```bash
-# Full ingestion with JIRA project
-python integrations/storage/ingest.py openshift/installer \
-  --jira OCPCLOUD \
-  --prs 200 \
-  --issues 100 \
-  --commits 200
+# Default: Last year
+python ingest.py openshift/installer --jira OCPCLOUD
 
-# GitHub only (will still fetch referenced JIRA issues)
-python integrations/storage/ingest.py kubernetes/kubernetes \
-  --prs 100
+# Specific dates
+python ingest.py openshift/installer \
+  --since 2024-01-01 \
+  --until 2024-12-31
 
-# Custom database location
-python integrations/storage/ingest.py openshift/machine-api-operator \
-  --jira OCPCLOUD \
-  --db /path/to/custom.db
+# Relative dates (N-days-ago)
+python ingest.py openshift/installer --since 90-days-ago
+python ingest.py openshift/installer --since 180-days-ago
+
+# Custom limits
+python ingest.py openshift/installer \
+  --prs 2000 \
+  --issues 1000 \
+  --jira OCPCLOUD
 ```
 
 ### GitHub Ingestion Only
 
 ```bash
-# Ingest specific repository
+# Ingest specific repository with GraphQL API
 python integrations/storage/ingest_github.py openshift/installer \
-  --prs 100 \
-  --issues 50 \
-  --commits 100
+  --since 2024-01-01 \
+  --prs 1000 \
+  --issues 500
 
 # This automatically extracts JIRA references
 ```
@@ -150,15 +155,20 @@ python integrations/storage/ingest_jira.py recent OCPCLOUD --days 90 --limit 100
 
 ```python
 from integrations.storage.database import KnowledgeDatabase
-from integrations.storage.ingest_github import GitHubIngester
+from integrations.storage.ingest_github import GitHubGraphQLIngester
 from integrations.storage.ingest_jira import JiraIngester
+from datetime import datetime, timedelta
 
 # Initialize
 db = KnowledgeDatabase()
 
-# GitHub ingestion
-github = GitHubIngester(db)
-github.ingest_full_repository('openshift', 'installer')
+# GitHub ingestion with date range
+github = GitHubGraphQLIngester(db)
+since = datetime.now() - timedelta(days=365)
+github.ingest_repository_full(
+    'openshift', 'installer',
+    since_date=since
+)
 
 # JIRA ingestion
 jira = JiraIngester(db)
@@ -190,14 +200,10 @@ Related to OCPCLOUD-789
            ↑ Extracted
 ```
 
-### Commit Messages
+### GitHub Issue Titles and Bodies
 ```
-commit abc123
-Author: Dev
-Date: 2024-01-01
-
-    Fix bug in reconciler (OCPCLOUD-999)
-                           ↑ Extracted
+Bug: OCPCLOUD-999 - Reconciler fails on edge case
+     ↑ Extracted
 ```
 
 ### Pattern Recognition
@@ -237,17 +243,17 @@ with db.get_connection() as conn:
     
     prs = cursor.fetchall()
 
-# Get commits that reference a JIRA issue
+# Get PRs created in last 30 days
 with db.get_connection() as conn:
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT c.sha, c.message, c.author_name, c.author_date
-        FROM github_commits c
-        JOIN github_jira_references ref ON ref.github_commit_sha = c.sha
-        WHERE ref.jira_issue_key = ?
-    """, ('OCPCLOUD-456',))
+        SELECT number, title, created_at, state
+        FROM github_pull_requests
+        WHERE created_at >= date('now', '-30 days')
+        ORDER BY created_at DESC
+    """)
     
-    commits = cursor.fetchall()
+    recent_prs = cursor.fetchall()
 ```
 
 ---
@@ -342,9 +348,9 @@ export JIRA_API_TOKEN=your-token
 ### Indexing
 All tables are indexed for fast queries:
 - JIRA issues: by project, type, key, status
-- GitHub PRs: by repo, number, state, author
-- Commits: by repo, SHA, date
-- Correlations: by PR, issue, commit, JIRA key
+- GitHub PRs: by repo, number, state, author, created_at
+- GitHub issues: by repo, number, state, created_at
+- Correlations: by PR, issue, JIRA key
 
 ### Query Performance
 
@@ -354,26 +360,25 @@ All tables are indexed for fast queries:
 | Get PRs with JIRA | 100 | ~10ms |
 | Get JIRA with PRs | 100 | ~15ms |
 | Full statistics | All | ~20ms |
+| Date range query | 1000 | ~50ms |
 
-### Storage Size
+### GraphQL API Benefits
 
-| Data | Records | Size |
-|------|---------|------|
-| 100 PRs | - | ~2MB |
-| 100 JIRA issues | - | ~1MB |
-| 1000 commits | - | ~5MB |
-| Total (typical) | - | ~10MB |
+- **Efficient**: Only fetches needed fields
+- **Pagination**: Cursor-based, handles large datasets
+- **Fast**: Single request can fetch nested data
+- **Reliable**: Built-in rate limiting and error handling
 
 ---
 
 ## 🧪 Testing
 
 ```bash
-# Test ingestion with small dataset
+# Test ingestion with small date range
 python integrations/storage/ingest.py openshift/api \
-  --prs 10 \
-  --issues 10 \
-  --commits 10
+  --since 30-days-ago \
+  --prs 50 \
+  --issues 50
 
 # Verify data
 python -c "
@@ -418,23 +423,13 @@ DELETE FROM jira_issues WHERE created_at < date('now', '-1 year');
 
 ---
 
-## 📘 Examples
-
-See `examples/` directory for:
-- Full ingestion workflow
-- Custom queries
-- Data export scripts
-- Integration with agent system
-
----
-
 ## 🆘 Troubleshooting
 
 ### "gh: command not found"
 Install GitHub CLI: https://cli.github.com
 
 ### "Rate limit exceeded"
-Set GITHUB_TOKEN environment variable
+Set GITHUB_TOKEN environment variable for higher limits (5000 req/hour)
 
 ### "Database locked"
 Close other connections to the database
@@ -443,7 +438,12 @@ Close other connections to the database
 Issue may be private or project key incorrect
 
 ### "No correlations found"
-GitHub data may not reference JIRA issues - check PR/commit messages
+GitHub data may not reference JIRA issues - check PR/issue titles and bodies
+
+### GraphQL Errors
+- Check query syntax if you see GraphQL errors
+- Ensure `gh` CLI is authenticated: `gh auth status`
+- Some fields may not be available for private repos
 
 ---
 
@@ -453,3 +453,114 @@ GitHub data may not reference JIRA issues - check PR/commit messages
 - GitHub MCP: `../github/GITHUB_MCP_INTEGRATION.md`
 - JIRA integration: `../jira/SIMPLIFIED_SETUP.md`
 - Agent integration: `../../agents/extractor/AGENT.md`
+
+---
+
+## 🎯 Best Practices
+
+### 1. Use Date Ranges Effectively
+
+```bash
+# For recent development activity
+python ingest.py openshift/installer --since 90-days-ago
+
+# For historical analysis
+python ingest.py openshift/installer --since 2023-01-01 --until 2023-12-31
+
+# For continuous updates (run monthly)
+python ingest.py openshift/installer --since 30-days-ago
+```
+
+### 2. Optimize Limits
+
+```bash
+# For quick overview
+python ingest.py openshift/installer --prs 100 --issues 50
+
+# For comprehensive analysis
+python ingest.py openshift/installer --prs 2000 --issues 1000
+```
+
+### 3. Regular Updates
+
+```bash
+# Recommended: Monthly ingestion of last 30-60 days
+# This keeps data fresh without re-ingesting everything
+python ingest.py openshift/installer --since 30-days-ago
+```
+
+### 4. Backup Database
+
+```bash
+# Before large ingestions
+cp ~/.agent-knowledge/data.db ~/.agent-knowledge/data.db.backup
+
+# Use SQLite backup command
+sqlite3 ~/.agent-knowledge/data.db ".backup '/path/to/backup.db'"
+```
+
+---
+
+## 📖 Examples
+
+### Example 1: Analyze Last Quarter
+
+```bash
+python ingest.py openshift/installer \
+  --since 90-days-ago \
+  --jira OCPCLOUD
+
+# Query recent features
+python -c "
+from integrations.storage.database import KnowledgeDatabase
+db = KnowledgeDatabase()
+issues = db.get_jira_issues_with_github(project_key='OCPCLOUD')
+for issue in issues[:10]:
+    print(f\"{issue['key']}: {issue['summary']} ({issue['pr_count']} PRs)\")
+"
+```
+
+### Example 2: Generate Documentation from Data
+
+```python
+from integrations.storage.database import KnowledgeDatabase
+
+db = KnowledgeDatabase()
+
+# Get architectural PRs
+with db.get_connection() as conn:
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT pr.*, GROUP_CONCAT(ref.jira_issue_key) as jira_keys
+        FROM github_pull_requests pr
+        LEFT JOIN github_jira_references ref ON ref.github_pr_id = pr.pr_id
+        WHERE pr.labels LIKE '%architecture%'
+        AND pr.created_at >= date('now', '-180 days')
+        GROUP BY pr.pr_id
+        ORDER BY pr.created_at DESC
+    """)
+    
+    architectural_prs = cursor.fetchall()
+    
+    # Generate ADR documentation
+    for pr in architectural_prs:
+        print(f"## ADR: {pr['title']}")
+        print(f"**PR**: #{pr['number']}")
+        print(f"**JIRA**: {pr['jira_keys']}")
+        print(f"**Date**: {pr['created_at']}")
+        print()
+```
+
+---
+
+## Summary
+
+This system provides **efficient single-repository ingestion** with:
+- ✅ GitHub GraphQL API for optimal performance
+- ✅ Date range filtering (default: past year)
+- ✅ Automatic JIRA correlation
+- ✅ Local SQLite storage
+- ✅ Fast indexed queries
+- ✅ Agent system integration
+
+**Perfect for**: Analyzing recent repository activity, tracking feature development, correlating GitHub and JIRA work, generating documentation from code history.

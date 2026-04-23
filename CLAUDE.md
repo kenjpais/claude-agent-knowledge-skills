@@ -331,11 +331,29 @@ scores = calculator.calculate()
 
 ### Integration with External Systems
 
-**GitHub**: Extract PRs, issues, commits
-- See `integrations/github/GITHUB_MCP_INTEGRATION.md`
+**GitHub & JIRA Storage** (`integrations/storage/`):
+- GitHub GraphQL API for efficient PR/issue ingestion
+- Date range filtering (default: past year)
+- Automatic JIRA reference extraction and correlation
+- Local SQLite database for fast queries
+- See `integrations/storage/README.md`
 
-**JIRA**: Extract features, bugs, requirements  
-- See `integrations/jira/JIRA_MCP_INTEGRATION.md`
+**Usage**:
+```bash
+# Ingest single repository (last year by default)
+python integrations/storage/ingest.py openshift/installer --jira OCPCLOUD
+
+# Ingest specific date range
+python integrations/storage/ingest.py openshift/installer \
+  --since 2024-01-01 \
+  --until 2024-12-31 \
+  --jira OCPCLOUD
+
+# Ingest last 90 days
+python integrations/storage/ingest.py openshift/installer \
+  --since 90-days-ago \
+  --jira OCPCLOUD
+```
 
 **Graphify**: Generate knowledge graphs
 - See `integrations/graphify/GRAPHIFY_SKILL.md`
