@@ -1,0 +1,92 @@
+---
+title: Reliability and Observability
+type: reliability
+last_updated: {ISO-8601}
+---
+
+# Reliability and Observability
+
+## SLOs (Service Level Objectives)
+{If applicable}
+
+| Metric | Target | Measurement |
+|--------|--------|-------------|
+| {Availability} | {99.9%} | {How measured} |
+| {Latency p95} | {<500ms} | {How measured} |
+
+## Monitoring
+
+### Metrics
+{What metrics are exposed and where}
+
+**Key Metrics**:
+- `{metric_name}`: {Description}
+- `{metric_name}`: {Description}
+
+### Dashboards
+{Links to monitoring dashboards, if applicable}
+
+### Alerts
+{What alerts exist and when they fire}
+
+## Logging
+
+### Log Levels
+- **ERROR**: {When used}
+- **WARN**: {When used}
+- **INFO**: {When used}
+- **DEBUG**: {When used}
+
+### Log Format
+{Structured logging format used}
+
+```json
+{
+  "timestamp": "...",
+  "level": "INFO",
+  "message": "...",
+  "context": {...}
+}
+```
+
+### Log Locations
+{Where logs are stored/accessed}
+
+## Tracing
+{If distributed tracing is implemented}
+
+## Health Checks
+
+### Liveness Probe
+{What is checked}
+
+### Readiness Probe
+{What is checked}
+
+## Failure Modes
+
+### {Failure Scenario}
+- **Symptoms**: {How to detect}
+- **Impact**: {What breaks}
+- **Mitigation**: {How to recover}
+
+### {Failure Scenario}
+- **Symptoms**: {How to detect}
+- **Impact**: {What breaks}
+- **Mitigation**: {How to recover}
+
+## Runbooks
+{Links to operational runbooks, if they exist}
+
+## Capacity Planning
+{How capacity is planned and monitored}
+
+## Disaster Recovery
+{Backup and recovery procedures}
+
+## Performance Characteristics
+{Expected performance characteristics}
+
+## References
+- [Architecture](DESIGN.md)
+- [Security](SECURITY.md)

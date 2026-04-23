@@ -1,0 +1,93 @@
+---
+title: Security Model
+type: security
+last_updated: {ISO-8601}
+---
+
+# Security Model
+
+## Threat Model
+{High-level threat model - what are we protecting against?}
+
+### Assets
+- {Asset}: {Why it's sensitive}
+- {Asset}: {Why it's sensitive}
+
+### Threats
+- {Threat}: {Risk level}
+- {Threat}: {Risk level}
+
+## Authentication
+{How authentication is handled}
+
+## Authorization
+
+### RBAC (if Kubernetes-based)
+| Role | Permissions | Resources |
+|------|-------------|-----------|
+| {role-name} | {verbs} | {resources} |
+
+### Required Permissions
+{What permissions this component needs}
+
+```yaml
+# Example RBAC manifest
+{RBAC example}
+```
+
+## Secrets Management
+{How secrets are stored and accessed}
+
+**DO**:
+- {Best practice}
+
+**DON'T**:
+- {Anti-pattern}
+
+## Network Security
+{Network policies, ingress/egress rules}
+
+## Data Security
+
+### Data at Rest
+{How data is protected at rest}
+
+### Data in Transit
+{How data is protected in transit}
+
+## Vulnerability Management
+{How vulnerabilities are tracked and patched}
+
+## Security Controls
+
+### Input Validation
+{Where and how input is validated}
+
+### Output Encoding
+{How output is sanitized}
+
+### CSRF Protection
+{If applicable}
+
+## Sensitive Operations
+{Operations that require special security consideration}
+
+1. **{Operation}**: {Security measures}
+2. **{Operation}**: {Security measures}
+
+## Security Testing
+{How security is tested}
+
+## Incident Response
+{What to do if security incident detected}
+
+## Compliance
+{Any compliance requirements - SOC2, FIPS, etc.}
+
+## Security Contacts
+{Who to contact for security issues}
+
+## References
+- [Architecture](DESIGN.md)
+- [Reliability](RELIABILITY.md)
+- Security Policy: {link if exists}

@@ -1,0 +1,284 @@
+# Skill Registry Index
+# Central registry for all skills in the agent knowledge system
+
+version: "1.0"
+last_updated: "2026-04-23"
+
+# Skill Categories
+categories:
+  - repo
+  - parsing
+  - inference
+  - synthesis
+  - linking
+  - validation
+  - documentation
+  - openshift
+  - monitoring
+
+# Repository Access Skills
+repo_skills:
+  - name: read-file
+    path: skills/repo/read-file.md
+    type: repo
+    description: Read file contents from the target repository
+    inputs: [file_path]
+    outputs: [content, content_hash]
+
+  - name: list-files
+    path: skills/repo/list-files.md
+    type: repo
+    description: List files in repository with optional filtering
+    inputs: [directory, pattern, max_depth, exclude_dirs]
+    outputs: [files]
+
+  - name: search-code
+    path: skills/repo/search-code.md
+    type: repo
+    description: Search for code patterns, symbols, or text across repository
+    inputs: [query, case_sensitive, file_pattern, max_results]
+    outputs: [matches]
+
+  - name: get-git-history
+    path: skills/repo/get-git-history.md
+    type: repo
+    description: Extract git commit history for files, directories, or entire repository
+    inputs: [path, since, until, author, max_commits]
+    outputs: [commits]
+
+# Parsing Skills
+parsing_skills:
+  - name: extract-go-structs
+    path: skills/parsing/extract-go-structs.md
+    type: parsing
+    description: Parse Go files to extract struct definitions, methods, and interfaces
+    inputs: [file_path, include_private, include_methods, include_comments]
+    outputs: [package, imports, types]
+    deterministic: true
+
+  - name: extract-kubernetes-crds
+    path: skills/parsing/extract-kubernetes-crds.md
+    type: parsing
+    description: Parse Kubernetes CRD YAML definitions and extract schema
+    inputs: [directory, recursive]
+    outputs: [crds]
+    deterministic: true
+    openshift_specific: true
+
+  - name: build-dependency-graph
+    path: skills/parsing/build-dependency-graph.md
+    type: parsing
+    description: Construct module-level and package-level dependency graph from imports
+    inputs: [root_directory, language, include_external, max_depth]
+    outputs: [graph, metrics]
+    deterministic: true
+
+  - name: parse-kubernetes-controller-pattern
+    path: skills/parsing/parse-kubernetes-controller-pattern.md
+    type: parsing
+    description: Identify and extract Kubernetes controller pattern components from code
+    inputs: [controller_file, include_predicates, include_status_updates]
+    outputs: [controller]
+    deterministic: true
+    openshift_specific: true
+
+# Inference Skills
+inference_skills:
+  - name: infer-component-boundary
+    path: skills/inference/infer-component-boundary.md
+    type: inference
+    description: Analyze dependency graph and code structure to infer logical component boundaries
+    inputs: [dependency_graph, directory_structure, min_confidence]
+    outputs: [components, overall_modularity]
+    probabilistic: true
+    confidence_scored: true
+
+  - name: classify-service-role
+    path: skills/inference/classify-service-role.md
+    type: inference
+    description: Infer the role of a component (controller, API server, webhook, CLI, library)
+    inputs: [component_name, files, dependency_graph]
+    outputs: [classification]
+    probabilistic: true
+    confidence_scored: true
+    openshift_specific: true
+
+# Synthesis Skills
+synthesis_skills:
+  - name: generate-component-doc
+    path: skills/synthesis/generate-component-doc.md
+    type: synthesis
+    description: Synthesize component documentation from extracted data and inferred meaning
+    inputs: [component, role, extracted_data]
+    outputs: [file_path, sections, line_count, links, warnings]
+    line_budget: 100
+
+  - name: generate-agents-md
+    path: skills/synthesis/generate-agents-md.md
+    type: synthesis
+    description: Create the primary AGENTS.md entry point with navigation structure
+    inputs: [components, concepts, build_commands, invariants, repository_purpose]
+    outputs: [file_path, line_count, sections, links, warnings]
+    line_budget: 150
+
+# Linking Skills
+linking_skills:
+  - name: link-concepts-to-components
+    path: skills/linking/link-concepts-to-components.md
+    type: linking
+    description: Create bidirectional links between domain concepts and components
+    inputs: [concepts_directory, components_directory, min_relevance_score, max_links_per_doc]
+    outputs: [links_created, links, low_confidence_links]
+
+# Validation Skills
+validation_skills:
+  - name: check-navigation-depth
+    path: skills/validation/check-navigation-depth.md
+    type: validation
+    description: Validate that any information is reachable within 3 hops from AGENTS.md
+    inputs: [root_file, max_depth, agentic_directory]
+    outputs: [passed, metrics, violations, navigation_distribution]
+    critical: true
+
+  - name: check-quality-score
+    path: skills/validation/check-quality-score.md
+    type: validation
+    description: Calculate and validate documentation quality metrics
+    inputs: [repository_path, agentic_directory, code_directories, quality_thresholds]
+    outputs: [passed, quality_score, metrics, timestamp]
+    critical: true
+
+# Documentation Skills
+documentation_skills:
+  - name: write-agentic-file
+    path: skills/documentation/write-agentic-file.md
+    type: documentation
+    description: Write or update files in the agentic/ documentation directory with validation
+    inputs: [file_path, content, frontmatter, validation_rules, create_backup]
+    outputs: [file_path, action, file_hash, line_count, validation_results, warnings]
+
+# Monitoring Skills
+monitoring_skills:
+  - name: log-operation
+    path: skills/monitoring/log-operation.md
+    type: monitoring
+    description: Log agent operations with structured metadata for monitoring and auditing
+    inputs: [agent_id, operation, resource, status, metadata]
+    outputs: [log_file, log_entry]
+    mandatory: true
+
+# Agent Skill Mappings
+# Defines which skills each agent uses
+
+agent_skill_mappings:
+  orchestrator:
+    discovery:
+      - list-files
+      - get-git-history
+      - build-dependency-graph
+    coordination:
+      - log-operation
+      - write-agentic-file
+    validation:
+      - check-quality-score
+
+  extractor:
+    repo_access:
+      - read-file
+      - list-files
+      - search-code
+      - get-git-history
+    parsing:
+      - extract-go-structs
+      - extract-kubernetes-crds
+      - build-dependency-graph
+      - parse-kubernetes-controller-pattern
+    monitoring:
+      - log-operation
+
+  synthesizer:
+    inference:
+      - infer-component-boundary
+      - classify-service-role
+    synthesis:
+      - generate-component-doc
+      - generate-agents-md
+    documentation:
+      - write-agentic-file
+    monitoring:
+      - log-operation
+
+  linker:
+    linking:
+      - link-concepts-to-components
+      - generate-agents-md
+    validation:
+      - check-navigation-depth
+    documentation:
+      - write-agentic-file
+    monitoring:
+      - log-operation
+
+  validator:
+    validation:
+      - check-navigation-depth
+      - check-quality-score
+    documentation:
+      - write-agentic-file
+    monitoring:
+      - log-operation
+
+  curator:
+    repo_access:
+      - get-git-history
+      - list-files
+      - search-code
+    validation:
+      - check-quality-score
+    monitoring:
+      - log-operation
+
+  retrieval:
+    repo_access:
+      - read-file
+      - search-code
+    monitoring:
+      - log-operation
+
+# Skill Dependencies
+# Skills that depend on outputs from other skills
+
+dependencies:
+  infer-component-boundary:
+    requires:
+      - build-dependency-graph
+
+  classify-service-role:
+    requires:
+      - infer-component-boundary
+      - build-dependency-graph
+
+  generate-component-doc:
+    requires:
+      - infer-component-boundary
+      - classify-service-role
+      - extract-go-structs
+      - extract-kubernetes-crds
+
+  link-concepts-to-components:
+    requires:
+      - generate-component-doc
+
+  generate-agents-md:
+    requires:
+      - generate-component-doc
+      - link-concepts-to-components
+
+  check-navigation-depth:
+    requires:
+      - generate-agents-md
+
+  check-quality-score:
+    requires:
+      - generate-agents-md
+      - check-navigation-depth

@@ -1,0 +1,95 @@
+---
+title: Testing Strategy
+type: testing
+last_updated: {ISO-8601}
+---
+
+# Testing Strategy
+
+## Test Organization
+```
+tests/
+├── unit/           # Unit tests
+├── integration/    # Integration tests
+├── e2e/            # End-to-end tests
+└── fixtures/       # Test data
+```
+
+## Running Tests
+
+### All Tests
+```bash
+{run all tests command}
+```
+
+### Unit Tests Only
+```bash
+{run unit tests command}
+```
+
+### Integration Tests Only
+```bash
+{run integration tests command}
+```
+
+### E2E Tests Only
+```bash
+{run e2e tests command}
+```
+
+### Single Test
+```bash
+{run specific test command}
+```
+
+### With Coverage
+```bash
+{run with coverage command}
+```
+
+## Test Patterns
+
+### Unit Tests
+{Description of unit test approach}
+
+**Example**:
+```{language}
+{Example unit test}
+```
+
+### Integration Tests
+{Description of integration test approach}
+
+**Example**:
+```{language}
+{Example integration test}
+```
+
+### E2E Tests
+{Description of e2e test approach}
+
+## Testing CRDs (if applicable)
+{How to test Kubernetes CRDs}
+
+## Mocking Strategy
+{What is mocked and what is real}
+
+## Test Data Management
+{How test data is organized and used}
+
+## CI Integration
+{How tests run in CI}
+
+## Coverage Requirements
+- Minimum coverage: {percentage}%
+- Coverage report: {where to find it}
+
+## Performance Tests
+{If applicable, how performance is tested}
+
+## Flaky Tests
+{How flaky tests are handled}
+
+## References
+- [Development Guide](DEVELOPMENT.md)
+- [CI Configuration](../.github/workflows/) {if applicable}

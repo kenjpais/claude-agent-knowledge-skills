@@ -1,0 +1,104 @@
+---
+type: execution-plan
+scope: {full|component|incremental|validation}
+status: {active|completed|failed}
+created: {ISO-8601}
+updated: {ISO-8601}
+---
+
+# Execution Plan: {Description}
+
+## Scope
+- **Target**: {repository-path|component-name|PR-number}
+- **Reason**: {Initial generation|Update|Fix|Validation}
+- **Triggered by**: {orchestrator|curator|manual}
+
+## Phases
+
+### 1. Extraction
+- [ ] Run extractor agent
+- **Components**: {list or "all"}
+- **Skills**: {list of skills to use}
+- **Output**: {artifact paths}
+- **Status**: {pending|in_progress|completed|failed}
+
+### 2. Synthesis
+- [ ] Run synthesizer agent
+- **Components**: {list or "all"}
+- **Skills**: {list of skills to use}
+- **Output**: {documentation files}
+- **Status**: {pending|in_progress|completed|failed}
+
+### 3. Linking
+- [ ] Run linker agent
+- **Tasks**: {link-concepts, generate-agents-md, etc.}
+- **Skills**: {list of skills to use}
+- **Output**: {AGENTS.md, updated navigation}
+- **Status**: {pending|in_progress|completed|failed}
+
+### 4. Validation
+- [ ] Run validator agent
+- **Checks**: {navigation-depth, quality-score, etc.}
+- **Skills**: {list of skills to use}
+- **Quality threshold**: {score}/100
+- **Status**: {pending|in_progress|completed|failed}
+
+## Metrics
+- Components processed: {number}
+- Files generated: {number}
+- Files updated: {number}
+- Duration: {time}
+- Quality score: {score}/100
+
+## Agent Execution Log
+
+### {Agent Name} - {Timestamp}
+- **Status**: {started|completed|failed}
+- **Duration**: {time}
+- **Output**: {summary}
+- **Errors**: {if any}
+
+### {Agent Name} - {Timestamp}
+- **Status**: {started|completed|failed}
+- **Duration**: {time}
+- **Output**: {summary}
+- **Errors**: {if any}
+
+## Failures and Retries
+{If any failures occurred}
+
+- **Agent**: {agent-name}
+- **Operation**: {operation}
+- **Error**: {error message}
+- **Retry count**: {number}
+- **Resolution**: {how resolved or "escalated"}
+
+## Quality Feedback Loop
+{If quality score < threshold}
+
+- **Initial score**: {score}/100
+- **Gaps identified**:
+  - {gap description}
+  - {gap description}
+- **Remediation actions**:
+  - [ ] {action}
+  - [ ] {action}
+- **Retry**: {yes|no}
+
+## Final Status
+- **Overall status**: {completed|failed|in_progress}
+- **Quality score**: {score}/100
+- **Passed validation**: {yes|no}
+- **Documentation ready**: {yes|no}
+
+## Artifacts Generated
+- `{file-path}` - {description}
+- `{file-path}` - {description}
+
+## Notes
+{Any additional notes, observations, or manual interventions}
+
+---
+
+**Next Steps**:
+{What should happen next - move to completed/, trigger curator, etc.}

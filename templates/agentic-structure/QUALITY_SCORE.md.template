@@ -1,0 +1,57 @@
+---
+last_updated: {ISO-8601}
+overall_score: 0
+status: pending
+---
+
+# Documentation Quality Score
+
+**Overall Score**: 0/100
+**Status**: ⏳ Pending Validation
+**Last Updated**: {ISO-8601}
+
+## Metrics
+
+### Coverage (0/40)
+- Total components: 0
+- Documented: 0
+- Coverage: 0%
+- **Undocumented**:
+  - {Will be populated by validator}
+
+### Freshness (0/20)
+- Total docs: 0
+- Stale (>90 days): 0
+- Staleness: 0%
+- **Stale files**:
+  - {Will be populated by validator}
+
+### Completeness (0/20)
+- Required files: 0/7
+- Required directories: Not checked
+- **Missing**:
+  - {Will be populated by validator}
+
+### Linkage (0/10)
+- Total links: 0
+- Broken links: 0
+- Orphaned docs: 0
+- **Issues**:
+  - {Will be populated by validator}
+
+### Navigation (0/10)
+- Max depth: Not checked
+- Violations: 0
+- Status: ⏳ Pending
+
+## Remediation Plan
+{Will be populated by validator if quality < threshold}
+
+## History
+| Date | Score | Status | Notes |
+|------|-------|--------|-------|
+| {ISO-8601} | 0 | Pending | Initial template |
+
+---
+
+**Note**: This file is automatically updated by the validator agent after documentation generation.

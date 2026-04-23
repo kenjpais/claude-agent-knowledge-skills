@@ -1,0 +1,78 @@
+---
+title: {Concept Name}
+type: concept
+category: {domain-category}
+last_updated: {ISO-8601}
+tags: [{tag1}, {tag2}]
+---
+
+# Concept: {Concept Name}
+
+## Definition
+{2-3 sentence definition of the concept}
+
+## Purpose
+{Why this concept exists in the system}
+
+## Structure
+{For technical concepts like CRDs, data structures}
+
+```{language}
+{Example structure}
+```
+
+## Key Characteristics
+1. **{Characteristic}**: {Description}
+2. **{Characteristic}**: {Description}
+3. **{Characteristic}**: {Description}
+
+## Relationships
+
+### Related Concepts
+- [{related-concept}](../concepts/{related-concept}.md): {Relationship type}
+
+### Implemented By
+- [{component}](../../design-docs/components/{component}.md): {How implemented}
+
+## State Transitions
+{If applicable - for stateful concepts}
+
+```
+{Initial State} → {Intermediate State} → {Final State}
+```
+
+## Validation Rules
+{If applicable - e.g., for CRDs}
+
+- {Rule}
+- {Rule}
+
+## Common Use Cases
+1. **{Use case}**: {Description}
+2. **{Use case}**: {Description}
+
+## Anti-Patterns
+{Common mistakes when working with this concept}
+
+- **{Anti-pattern}**: {Why problematic}
+
+## Examples
+{Code examples, YAML examples, etc.}
+
+```{language}
+{Example}
+```
+
+## Navigation
+
+### Workflows
+- [{workflow}](../workflows/{workflow}.md): {Relevance}
+
+### References
+- Code: `{file-path}`
+- Tests: `{file-path}`
+- Docs: {external-link}
+
+---
+
+**Line budget**: ≤75 lines

@@ -1,0 +1,104 @@
+---
+title: Development Guide
+type: development
+last_updated: {ISO-8601}
+---
+
+# Development Guide
+
+## Prerequisites
+- {Tool name} {version}
+- {Tool name} {version}
+
+## Initial Setup
+```bash
+# Clone repository
+git clone {repository-url}
+cd {repository-name}
+
+# Install dependencies
+{install command}
+
+# Verify setup
+{verification command}
+```
+
+## Development Environment
+### Recommended Tools
+- {Tool}: {Purpose}
+- {Tool}: {Purpose}
+
+### Configuration
+{Environment variables, config files, etc.}
+
+```bash
+# Required environment variables
+export {VAR_NAME}={value}
+```
+
+## Common Development Tasks
+
+### Build
+```bash
+{build command}
+```
+
+### Run Locally
+```bash
+{run command}
+```
+
+### Run Tests
+```bash
+# All tests
+{test command}
+
+# Specific test
+{single test command}
+
+# Integration tests
+{integration test command}
+```
+
+### Lint
+```bash
+{lint command}
+```
+
+### Generate Code
+```bash
+# If applicable (e.g., CRD generation, mocks)
+{generate command}
+```
+
+## Project Structure
+```
+{repository-name}/
+├── {directory}/    # {Purpose}
+├── {directory}/    # {Purpose}
+└── agentic/        # Agent documentation
+```
+
+## Development Workflow
+1. {Step 1}
+2. {Step 2}
+3. {Step 3}
+
+## Debugging
+### Local Debugging
+{How to debug locally}
+
+### Remote Debugging
+{How to debug in cluster, if applicable}
+
+## Troubleshooting
+### Issue: {Common problem}
+**Solution**: {How to fix}
+
+### Issue: {Common problem}
+**Solution**: {How to fix}
+
+## References
+- [Testing Guide](TESTING.md)
+- [Architecture](DESIGN.md)
+- [Contributing Guidelines](../CONTRIBUTING.md) {if exists}

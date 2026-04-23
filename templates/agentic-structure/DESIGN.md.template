@@ -1,0 +1,59 @@
+---
+title: Design Philosophy
+type: design
+last_updated: {ISO-8601}
+---
+
+# Design Philosophy
+
+## Purpose
+{2-3 sentences on what problem this repository solves}
+
+## Core Beliefs
+{Link to agentic/design-docs/core-beliefs.md for details}
+
+1. **{Principle Name}**: {One sentence}
+2. **{Principle Name}**: {One sentence}
+3. **{Principle Name}**: {One sentence}
+
+## Architecture Overview
+{High-level architecture description - 3-4 sentences}
+
+See [Component Architecture](design-docs/component-architecture.md) for details.
+
+## Layering Rules
+| Layer | Responsibility | May Depend On | May NOT Depend On |
+|-------|----------------|---------------|-------------------|
+| {layer-name} | {purpose} | {allowed deps} | {forbidden deps} |
+
+## Component Organization
+{How components are organized and why}
+
+See [Components Index](design-docs/components/index.md) for component list.
+
+## Data Flow
+{High-level data flow description}
+
+See [Data Flow](design-docs/data-flow.md) for detailed diagrams.
+
+## Key Design Decisions
+- [{ADR-001}](decisions/ADR-001-{title}.md): {Decision summary}
+- [{ADR-002}](decisions/ADR-002-{title}.md): {Decision summary}
+
+## Constraints
+### Technical
+- {Constraint and reasoning}
+
+### Operational
+- {Constraint and reasoning}
+
+## Anti-Patterns
+{Patterns to avoid in this codebase}
+
+1. **{Anti-pattern}**: {Why it's problematic}
+2. **{Anti-pattern}**: {Why it's problematic}
+
+## References
+- [Component Architecture](design-docs/component-architecture.md)
+- [Core Beliefs](design-docs/core-beliefs.md)
+- [Architecture Decision Records](decisions/)

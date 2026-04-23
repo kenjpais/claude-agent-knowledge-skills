@@ -1,0 +1,60 @@
+# AGENTS.md
+
+## What This Repository Does
+{3-4 sentence description of repository purpose and scope}
+
+## Navigation by Intent
+| I want to... | Start here |
+|--------------|------------|
+| Understand what this repo does | AGENTS.md (this file) |
+| Set up my development environment | [DEVELOPMENT.md](agentic/DEVELOPMENT.md) |
+| Understand the architecture | [DESIGN.md](agentic/DESIGN.md) |
+| Find a specific component | [Components Index](agentic/design-docs/components/index.md) |
+| Learn about a domain concept | [Concepts Index](agentic/domain/concepts/index.md) |
+| Understand a workflow | [Workflows](agentic/domain/workflows/index.md) |
+| See recent architectural decisions | [ADRs](agentic/decisions/) |
+| Run tests | [TESTING.md](agentic/TESTING.md) |
+| Understand security model | [SECURITY.md](agentic/SECURITY.md) |
+| {Add repository-specific intents} | {Links} |
+
+## Repository Structure
+```
+{repository-name}/
+├── {critical directories only}
+└── agentic/          # Agent-optimized documentation
+```
+
+## Component Boundaries
+| Component | Role | Entry Point | Documentation |
+|-----------|------|-------------|----------------|
+| {component-name} | {controller\|webhook\|cli\|library} | {file-path} | [Link](agentic/design-docs/components/{name}.md) |
+
+## Core Concepts
+- [{Concept1}](agentic/domain/concepts/{concept1}.md) - {one-line description}
+- [{Concept2}](agentic/domain/concepts/{concept2}.md) - {one-line description}
+
+## Key Invariants
+1. {Critical rule that must not be violated}
+2. {Another invariant}
+3. {etc}
+
+## Critical Code Locations
+| I need to... | Look here |
+|--------------|-----------|
+| Add a new CRD | {file-path} |
+| Modify reconcile loop | {file-path} |
+| {common task} | {file-path} |
+
+## Build & Test
+```bash
+# Build
+{build command}
+
+# Test
+{test command}
+
+# Run locally
+{run command}
+```
+
+**Line budget**: ≤150 lines total

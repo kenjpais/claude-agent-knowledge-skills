@@ -1,0 +1,89 @@
+---
+title: {Component Name}
+type: component
+role: {controller|webhook|cli|library|api-server}
+confidence: {0.0-1.0}
+last_updated: {ISO-8601}
+tags: [{tag1}, {tag2}]
+---
+
+# Component: {Component Name}
+
+**Role**: {Primary Role}
+**Confidence**: {Score}/1.0
+
+## Overview
+{2-3 sentence purpose and responsibilities}
+
+## Architecture
+
+### Key Types
+| Type | Location | Purpose |
+|------|----------|---------|
+| {TypeName} | {file-path:line} | {Purpose} |
+
+### Interfaces
+| Interface | Location | Purpose |
+|-----------|----------|---------|
+| {InterfaceName} | {file-path:line} | {Purpose} |
+
+### Entry Points
+| Entry Point | Location | Purpose |
+|-------------|----------|---------|
+| {main/Reconcile/etc} | {file-path:line} | {Purpose} |
+
+## Dependencies
+
+### Internal
+- [{component}](../components/{component}.md): {Why needed}
+
+### External
+- `{package}`: {Purpose}
+
+## API Surface
+
+### {For Controllers: CRDs Managed}
+| CRD | Group | Version | Purpose |
+|-----|-------|---------|---------|
+| {Kind} | {group} | {version} | {Purpose} |
+
+### {For Libraries: Public API}
+| Function/Type | Signature | Purpose |
+|---------------|-----------|---------|
+| {Name} | {Signature} | {Purpose} |
+
+### {For CLIs: Commands}
+| Command | Flags | Purpose |
+|---------|-------|---------|
+| {command} | {flags} | {Purpose} |
+
+## Configuration
+{Environment variables, flags, config files}
+
+| Config | Type | Default | Purpose |
+|--------|------|---------|---------|
+| {NAME} | {env|flag|config} | {value} | {Purpose} |
+
+## Key Invariants
+1. {Critical rule that must not be violated}
+2. {Another invariant}
+
+## Navigation
+
+### Related Components
+- [{component}](../components/{component}.md): {Relationship}
+
+### Related Concepts
+- [{concept}](../../domain/concepts/{concept}.md): {Relationship}
+
+### Related Decisions
+- [{ADR-NNN}](../../decisions/ADR-NNN-{title}.md): {Relevance}
+
+### Code References
+- Entry point: `{file-path:line}`
+- Key logic: `{file-path:line}`
+- Tests: `{file-path}`
+
+---
+
+**Line budget**: ≤100 lines
