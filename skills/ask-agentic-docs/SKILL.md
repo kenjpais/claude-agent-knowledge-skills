@@ -41,24 +41,45 @@ Before executing any query, the skill validates:
 
 ## Workflow
 
-### Step 1: Validate Graph Exists
+### Step 1: Resolve Repository Path
 
 ```python
-import os
 from pathlib import Path
 
-# Check if graph exists
-graph_path = Path.cwd() / "agentic" / "knowledge-graph" / "graph.json"
+# Parse repository parameter (required)
+repository_input = "<path/to/repository | github-url>"
+
+# If GitHub URL, clone to /tmp/agentic-repos/<repo-name>/
+if is_github_url(repository_input):
+    result = clone_github_repository(repository_input)
+    repository_path = Path(result["local_path"])
+else:
+    repository_path = Path(repository_input).resolve()
+
+# Validate repository exists
+if not repository_path.exists():
+    return {
+        "error": "Repository not found",
+        "path": str(repository_path)
+    }
+```
+
+### Step 2: Validate Graph Exists
+
+```python
+# Check if graph exists at required location
+graph_path = repository_path / "agentic" / "knowledge-graph" / "graph.json"
 
 if not graph_path.exists():
     return {
         "error": "Knowledge graph not found",
-        "message": "Run /create first to generate agentic documentation and knowledge graph",
-        "expected_location": str(graph_path)
+        "message": f"Run /create {repository_input} first to generate agentic documentation and knowledge graph",
+        "expected_location": str(graph_path),
+        "repository": str(repository_path)
     }
 ```
 
-### Step 2: Load Graph into Memory
+### Step 3: Load Graph into Memory
 
 ```python
 import json
@@ -80,7 +101,7 @@ if G.number_of_nodes() == 0:
     }
 ```
 
-### Step 3: Parse Query and Execute
+### Step 4: Parse Query and Execute
 
 ```python
 # Query is executed entirely from in-memory graph
@@ -95,7 +116,7 @@ target = extract_target(query)      # "installer"
 result = retrieve_from_graph(G, query_type, target)
 ```
 
-### Step 4: Return Results
+### Step 5: Return Results
 
 ```python
 return {
@@ -109,22 +130,22 @@ return {
 
 ## Input
 
-**Query** (required) and optional **Repository Path or GitHub URL**
+**Query** (required) and **Repository Path or GitHub URL** (required)
 
 ```
-/ask <question> [path/to/repository | github-url]
+/ask <question> <path/to/repository | github-url>
 ```
 
 **Examples**:
 ```bash
-# Query current directory
-/ask what components exist?
-
-# Query specific local repository
-/ask how does the installer work? /path/to/openshift-installer
+# Query local repository
+/ask what components exist? /path/to/openshift-installer
 
 # Query GitHub repository (auto-clones if needed)
-/ask what is the reconciliation pattern? https://github.com/openshift/installer
+/ask how does the installer work? https://github.com/openshift/installer
+
+# Query with short GitHub format
+/ask what is the reconciliation pattern? github.com/openshift/installer
 ```
 
 ## Auto-Cloning
@@ -529,4 +550,4 @@ Query is successful when:
 ## Example Session
 
 ```
-User: /ask what components exist?
+User: /ask what components exist? https://github.com/openshift/installer

@@ -59,7 +59,7 @@ Open Claude Code and use the core skills:
 /create                    # Generate agentic documentation
 /validate                  # Validate documentation quality
 /evaluate                  # Test with coding agent simulation
-/ask what components exist?  # Query documentation
+/ask what components exist? <repo-path>  # Query documentation (requires repo path/URL)
 ```
 
 ---
@@ -150,10 +150,10 @@ repository/
 
 **How to use**:
 ```bash
-# In Claude Code
-/ask what components exist?                                       # Current directory
-/ask how does the installer work? /path/to/openshift-installer  # Local repository
-/ask what is reconciliation? https://github.com/openshift/installer  # GitHub URL (auto-clones)
+# In Claude Code - repository path/URL is REQUIRED
+/ask what components exist? /path/to/openshift-installer              # Local repository
+/ask how does the installer work? https://github.com/openshift/installer  # GitHub URL (auto-clones)
+/ask what is reconciliation? github.com/openshift/installer            # GitHub URL (auto-clones)
 ```
 
 **Query types**:
@@ -163,6 +163,8 @@ repository/
 - Architecture overview
 - Development guidance
 - Relationship queries
+
+**Note**: Repository path or GitHub URL is **required** - the skill queries the knowledge graph at `<repo>/agentic/knowledge-graph/graph.json`
 
 ---
 

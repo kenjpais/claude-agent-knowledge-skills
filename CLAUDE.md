@@ -97,18 +97,20 @@ This repository is a **skill library** for Claude Code containing 40+ skills for
 
 **Usage**:
 ```bash
-# User types in Claude Code:
-/ask what components exist?
-/ask how does the installer work?
-/ask what is the reconciliation pattern?
+# User types in Claude Code (repository path/URL REQUIRED):
+/ask what components exist? /path/to/repo
+/ask how does the installer work? https://github.com/openshift/installer
+/ask what is the reconciliation pattern? github.com/openshift/installer
 ```
 
 **How to answer**:
-1. Parse query to identify query type (component, concept, architecture, etc.)
-2. Start from AGENTS.md (hop 0)
-3. Navigate to relevant documentation (≤3 hops)
-4. Return answer with context (≤500 lines)
-5. Include related links and navigation path
+1. **Resolve repository path** (required parameter - local path or GitHub URL)
+2. **Load knowledge graph** from `<repo>/agentic/knowledge-graph/graph.json` into NetworkX in-memory
+3. Parse query to identify query type (component, concept, architecture, etc.)
+4. Query the in-memory graph (NO file I/O during retrieval)
+5. Navigate graph (≤3 hops from EntryPoint node)
+6. Return answer with context (≤500 lines)
+7. Include related links and navigation path
 
 **Query types**:
 - Component discovery

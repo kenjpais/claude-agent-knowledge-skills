@@ -59,8 +59,8 @@ Open Claude Code in any repository and use the core skills:
 /evaluate                                                  # Current directory
 /evaluate /path/to/openshift-installer                   # Local repository
 
-/ask what components exist?                                       # Current directory
-/ask how does installer work? https://github.com/openshift/installer  # GitHub URL
+/ask what components exist? /path/to/openshift-installer              # Local repository
+/ask how does installer work? https://github.com/openshift/installer  # GitHub URL (auto-clones)
 ```
 
 ### Example Session
@@ -87,8 +87,8 @@ cd /path/to/openshift-installer
 # ✅ Validates line budgets
 # ✅ Calculates quality score (≥70/100)
 
-# 4. Query documentation
-/ask how does the installer work?
+# 4. Query documentation (repository path/URL REQUIRED)
+/ask how does the installer work? /path/to/openshift-installer
 # Or: /ask how does installer work? https://github.com/openshift/installer
 # Returns: Purpose, responsibilities, dependencies, workflow
 
@@ -145,11 +145,13 @@ Query documentation with progressive disclosure (≤3 hops, ≤500 lines context
 
 **Examples:**
 ```bash
-/ask what components exist?
-/ask how does the installer work?
-/ask what is the reconciliation pattern?
-/ask show me the architecture
+/ask what components exist? /path/to/repo
+/ask how does the installer work? https://github.com/openshift/installer
+/ask what is the reconciliation pattern? github.com/openshift/installer
+/ask show me the architecture /path/to/openshift-installer
 ```
+
+**Note**: Repository path or GitHub URL is **required**. The skill queries `<repo>/agentic/knowledge-graph/graph.json`.
 
 ## Development
 
