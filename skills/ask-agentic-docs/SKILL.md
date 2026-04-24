@@ -109,20 +109,29 @@ return {
 
 ## Input
 
-**Query** (required)
+**Query** (required) and optional **Repository Path or GitHub URL**
 
 ```
-/ask <question>
+/ask <question> [path/to/repository | github-url]
 ```
 
 **Examples**:
 ```bash
+# Query current directory
 /ask what components exist?
-/ask how does the installer work?
-/ask what is the reconciliation pattern?
-/ask show me the architecture
-/ask where is authentication handled?
+
+# Query specific local repository
+/ask how does the installer work? /path/to/openshift-installer
+
+# Query GitHub repository (auto-clones if needed)
+/ask what is the reconciliation pattern? https://github.com/openshift/installer
 ```
+
+## Auto-Cloning
+
+If a GitHub URL is provided and not already cloned, the repository will be cloned to `/tmp/agentic-repos/<repo-name>/` before querying.
+
+**Note**: The repository must have a knowledge graph at `<repo>/agentic/knowledge-graph/graph.json`. If not present, run `/create` first.
 
 ## Query Types
 

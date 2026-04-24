@@ -49,20 +49,29 @@ Open Claude Code in any repository and use the core skills:
 
 ```bash
 # In Claude Code
-/create                    # Generate complete agentic documentation
-/validate                  # Validate documentation quality
-/evaluate                  # Test with coding agent simulation
-/ask what components exist?  # Query documentation
+/create                                                    # Current directory
+/create /path/to/openshift-installer                     # Local repository
+/create https://github.com/openshift/installer           # GitHub URL (auto-clones)
+
+/validate                                                  # Current directory
+/validate https://github.com/openshift/installer         # GitHub URL (auto-clones)
+
+/evaluate                                                  # Current directory
+/evaluate /path/to/openshift-installer                   # Local repository
+
+/ask what components exist?                                       # Current directory
+/ask how does installer work? https://github.com/openshift/installer  # GitHub URL
 ```
 
 ### Example Session
 
 ```bash
-# 1. Navigate to target repository
+# Option 1: Use with local repository
 cd /path/to/openshift-installer
+# Type in Claude Code: /create
 
-# 2. Open Claude Code and type:
-/create
+# Option 2: Use with GitHub URL (auto-clones to /tmp/agentic-repos/)
+# Type in Claude Code: /create https://github.com/openshift/installer
 
 # Claude generates:
 # ✅ AGENTS.md (entry point, ≤150 lines)
@@ -73,16 +82,19 @@ cd /path/to/openshift-installer
 
 # 3. Validate quality
 /validate
+# Or: /validate https://github.com/openshift/installer
 # ✅ Checks navigation depth (≤3 hops)
 # ✅ Validates line budgets
 # ✅ Calculates quality score (≥70/100)
 
 # 4. Query documentation
 /ask how does the installer work?
+# Or: /ask how does installer work? https://github.com/openshift/installer
 # Returns: Purpose, responsibilities, dependencies, workflow
 
 # 5. Evaluate with coding agent
 /evaluate
+# Or: /evaluate https://github.com/openshift/installer
 # Spawns sub-agent to test documentation with 5 scenarios
 ```
 

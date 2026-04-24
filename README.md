@@ -72,8 +72,10 @@ Open Claude Code and use the core skills:
 
 **How to use**:
 ```bash
-# In Claude Code, in any repository directory
-/create
+# In Claude Code
+/create                                                    # Current directory
+/create /path/to/openshift-installer                     # Local repository path
+/create https://github.com/openshift/installer           # GitHub URL (auto-clones)
 ```
 
 **What happens**:
@@ -100,8 +102,10 @@ repository/
 
 **How to use**:
 ```bash
-# In repository with existing agentic docs
-/validate
+# In Claude Code
+/validate                                                  # Current directory
+/validate /path/to/openshift-installer                   # Local repository path
+/validate https://github.com/openshift/installer         # GitHub URL (auto-clones)
 ```
 
 **Checks**:
@@ -119,8 +123,10 @@ repository/
 
 **How to use**:
 ```bash
-# In repository with agentic docs
-/evaluate
+# In Claude Code
+/evaluate                                                  # Current directory
+/evaluate /path/to/openshift-installer                   # Local repository path
+/evaluate https://github.com/openshift/installer         # GitHub URL (auto-clones)
 ```
 
 **Test scenarios** (5 total):
@@ -144,10 +150,10 @@ repository/
 
 **How to use**:
 ```bash
-# In repository with agentic docs
-/ask what components exist?
-/ask how does the installer work?
-/ask what is the reconciliation pattern?
+# In Claude Code
+/ask what components exist?                                       # Current directory
+/ask how does the installer work? /path/to/openshift-installer  # Local repository
+/ask what is reconciliation? https://github.com/openshift/installer  # GitHub URL (auto-clones)
 ```
 
 **Query types**:

@@ -65,6 +65,13 @@ core_skills:
 
 # Repository Access Skills
 repo_skills:
+  - name: clone-github-repository
+    path: skills/clone-github-repository/SKILL.md
+    type: repo
+    description: Clone a GitHub repository if not already present locally
+    inputs: [github_url, target_directory]
+    outputs: [local_path, repository_name, owner, cloned, git_url]
+
   - name: read-file
     path: skills/repo/read-file.md
     type: repo

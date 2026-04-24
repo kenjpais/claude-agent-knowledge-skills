@@ -19,6 +19,39 @@ outputs: [evaluation_report, metrics, recommendations]
 
 This skill evaluates documentation quality by spawning a sub-agent ("coding agent") and testing whether it can complete real coding tasks using ONLY the agentic documentation.
 
+## Input
+
+**Repository Path or GitHub URL** (optional - defaults to current directory)
+
+```
+/evaluate [path/to/repository | github-url]
+```
+
+**Examples**:
+```bash
+/evaluate                                                  # Current directory
+/evaluate /path/to/openshift-installer                   # Local repository path
+/evaluate https://github.com/openshift/installer         # GitHub URL (auto-clones)
+/evaluate github.com/openshift/installer                 # GitHub URL (auto-clones)
+```
+
+## Auto-Cloning
+
+If a GitHub URL is provided and the repository is not already cloned:
+
+1. **Parse GitHub URL**: Extract owner and repository name
+2. **Clone locally**: `git clone <url> /tmp/agentic-repos/<repo-name>`
+3. **Use cloned path**: Continue with evaluation in cloned repository
+4. **Evaluate from**: `<cloned-repo>/agentic/` directory
+
+**Clone location**: `/tmp/agentic-repos/<repo-name>/`
+
+**Supported URL formats**:
+- `https://github.com/owner/repo`
+- `https://github.com/owner/repo.git`
+- `github.com/owner/repo`
+- `git@github.com:owner/repo.git`
+
 ## Test Scenarios
 
 ### 1. New Feature Implementation

@@ -19,17 +19,36 @@ This skill orchestrates the full documentation generation pipeline, coordinating
 
 ## Input
 
-**Repository Path** (optional - defaults to current directory)
+**Repository Path or GitHub URL** (optional - defaults to current directory)
 
 ```
-/create [path/to/repository]
+/create [path/to/repository | github-url]
 ```
 
 **Examples**:
 ```bash
-/create                                    # Current directory
-/create /path/to/openshift-installer      # Specific repository
+/create                                                    # Current directory
+/create /path/to/openshift-installer                     # Local repository path
+/create https://github.com/openshift/installer           # GitHub URL (auto-clones)
+/create github.com/openshift/installer                   # GitHub URL (auto-clones)
 ```
+
+## Auto-Cloning
+
+If a GitHub URL is provided and the repository is not already cloned:
+
+1. **Parse GitHub URL**: Extract owner and repository name
+2. **Clone locally**: `git clone <url> /tmp/agentic-repos/<repo-name>`
+3. **Use cloned path**: Continue with documentation generation in cloned repository
+4. **Output location**: `<cloned-repo>/AGENTS.md` and `<cloned-repo>/agentic/`
+
+**Clone location**: `/tmp/agentic-repos/<repo-name>/`
+
+**Supported URL formats**:
+- `https://github.com/owner/repo`
+- `https://github.com/owner/repo.git`
+- `github.com/owner/repo`
+- `git@github.com:owner/repo.git`
 
 ## Process
 
@@ -88,8 +107,10 @@ This skill orchestrates the full documentation generation pipeline, coordinating
 
 ## Output Structure
 
+**All output generated in the repository directory itself** (not in a separate output/ directory):
+
 ```
-repository/
+<repository-path>/
 ├── AGENTS.md                    # Entry point (≤150 lines)
 └── agentic/
     ├── DESIGN.md               # Design philosophy
@@ -111,6 +132,8 @@ repository/
         ├── active/
         └── completed/
 ```
+
+**For GitHub URLs**: Documentation generated in `/tmp/agentic-repos/<repo-name>/`
 
 ## Quality Constraints
 

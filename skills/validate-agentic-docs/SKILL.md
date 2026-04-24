@@ -19,17 +19,36 @@ This skill validates that agentic documentation meets all quality constraints, i
 
 ## Input
 
-**Repository Path** (optional - defaults to current directory)
+**Repository Path or GitHub URL** (optional - defaults to current directory)
 
 ```
-/validate [path/to/repository]
+/validate [path/to/repository | github-url]
 ```
 
 **Examples**:
 ```bash
-/validate                                  # Current directory
-/validate /path/to/openshift-installer    # Specific repository
+/validate                                                  # Current directory
+/validate /path/to/openshift-installer                   # Local repository path
+/validate https://github.com/openshift/installer         # GitHub URL (auto-clones)
+/validate github.com/openshift/installer                 # GitHub URL (auto-clones)
 ```
+
+## Auto-Cloning
+
+If a GitHub URL is provided and the repository is not already cloned:
+
+1. **Parse GitHub URL**: Extract owner and repository name
+2. **Clone locally**: `git clone <url> /tmp/agentic-repos/<repo-name>`
+3. **Use cloned path**: Continue with validation in cloned repository
+4. **Validate from**: `<cloned-repo>/agentic/` directory
+
+**Clone location**: `/tmp/agentic-repos/<repo-name>/`
+
+**Supported URL formats**:
+- `https://github.com/owner/repo`
+- `https://github.com/owner/repo.git`
+- `github.com/owner/repo`
+- `git@github.com:owner/repo.git`
 
 ## Validation Checks
 

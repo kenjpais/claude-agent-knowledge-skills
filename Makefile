@@ -65,17 +65,11 @@ clean:
 	find . -type f -name '.coverage' -delete 2>/dev/null || true
 	@echo "✅ Cleanup complete"
 
-# Output directory
-output:
-	@echo "📁 Creating output directory structure..."
-	@mkdir -p output/agentic output/graphs output/databases
-	@touch output/agentic/.gitkeep output/graphs/.gitkeep output/databases/.gitkeep
-	@echo "✅ Output directories ready"
-	@echo ""
-	@echo "Output structure:"
-	@echo "  output/agentic/    - Generated agentic documentation"
-	@echo "  output/graphs/     - Knowledge graphs"
-	@echo "  output/databases/  - SQLite databases"
+# Cleanup cloned repositories
+clean-repos:
+	@echo "🧹 Cleaning cloned repositories..."
+	@rm -rf /tmp/agentic-repos
+	@echo "✅ Cloned repositories cleaned"
 
 # Check environment
 check-env:
