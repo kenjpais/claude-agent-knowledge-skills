@@ -1,281 +1,479 @@
-# Agent Knowledge System for OpenShift Documentation
+# Agent Knowledge System for Claude Code
 
-An agent-based system for automatically generating and maintaining agentic documentation for Red Hat OpenShift repositories. This system enables AI coding assistants to navigate codebases efficiently through progressive disclosure and structured knowledge.
+A **skill library** for Claude Code that enables automatic generation and maintenance of agentic documentation for OpenShift and Kubernetes repositories. This system enables AI agents to navigate codebases efficiently through progressive disclosure and structured knowledge.
 
 ## Overview
 
-This repository implements a complete framework for:
-- **Extracting** structured data from OpenShift repositories (CRDs, controllers, dependencies)
-- **Synthesizing** human and agent-readable documentation from extracted data
-- **Linking** documentation into a navigable knowledge graph (≤3 hops from entry point)
-- **Validating** documentation quality and enforcing structural constraints
-- **Maintaining** documentation freshness through continuous monitoring
+This repository contains **7 core skills** that work directly with **Claude Code**. Skills are organized into focused categories for documentation generation, validation, evaluation, and querying.
 
-## Key Features
-
-✅ **7 Specialized Agents** - Orchestrator, Extractor, Synthesizer, Linker, Validator, Curator, Retrieval  
-✅ **20+ Skills** - Atomic, composable capabilities across repo access, parsing, inference, synthesis, linking, and validation  
-✅ **Quality Enforcement** - Automatic validation of navigation depth (≤3 hops), line budgets, and coverage  
-✅ **OpenShift Optimized** - Specialized skills for Kubernetes controllers, CRDs, operators, and reconcile loops  
-✅ **GitHub & JIRA Integration** - Extract architectural context from PRs, issues, and requirements  
-✅ **Knowledge Graphs** - Integration with graphify for enhanced navigation and querying  
-✅ **Comprehensive Logging** - All operations logged for auditing and debugging  
-✅ **Template-Based** - Structured templates for AGENTS.md, component docs, concept docs, and required files
-
-## 🚀 Quick Start (5 Minutes!)
-
-### 1. Clone and Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/claude-agent-knowledge-system-skills.git
-cd claude-agent-knowledge-system-skills
-
-# Run automated setup
-./setup.sh
-```
-
-### 2. Set GitHub Token (Optional)
-
-```bash
-# For higher rate limits and private repos
-export GITHUB_TOKEN=ghp_your_token_here
-```
-
-### 3. Generate Documentation
-
-```bash
-# Generate for any OpenShift repository
-agentic-docs generate /path/to/openshift-installer
-
-# That's it! ✅
-```
-
-**See [GETTING_STARTED.md](GETTING_STARTED.md) for detailed instructions.**
+**Key Features:**
+- ✅ **Ready to use** - Works directly in Claude Code
+- ✅ **7 Core Skills** - `/create`, `/validate`, `/evaluate`, `/ask`, `/ingest-github-data`, `/generate-knowledge-graph`, `/retrieve-from-graph`
+- ✅ **4 User-Facing Skills** - `/create`, `/validate`, `/evaluate`, `/ask`
+- ✅ **Quality Enforcement** - ≤3 hop navigation, line budgets, coverage
+- ✅ **OpenShift Optimized** - Kubernetes controllers, CRDs, operators
+- ✅ **GitHub & JIRA Integration** - GitHub GraphQL API for data ingestion
+- ✅ **Knowledge Graphs** - NetworkX-based graph generation and retrieval
 
 ---
 
-## 📖 Learn More
+## 🚀 Quick Start
 
-### Architecture Documentation
-- `AGENT_KNOWLEDGE_FRAMEWORK.md` - System architecture and design
-- `CLAUDE.md` - Implementation guide and usage instructions
-- `GOAL.md` - Project objectives and requirements
-- `GETTING_STARTED.md` - **⭐ Start here for setup**
+### 1. Prerequisites
 
-### Agent Definitions
-Each agent has a detailed definition in `agents/{agent-name}/AGENT.md`:
-- **Orchestrator** - Coordinates the documentation pipeline
-- **Extractor** - Mines repository data deterministically  
-- **Synthesizer** - Generates documentation from extracted data
-- **Linker** - Creates navigation structure
-- **Validator** - Enforces quality constraints
-- **Curator** - Maintains documentation freshness
-- **Retrieval** - Provides controlled documentation access
+- Python 3.9+
+- Claude Code installed
 
-### 3. Browse Skills
-Skills are organized by category in `skills/`:
-- `repo/` - Repository access (read, list, search, git history)
-- `parsing/` - Extraction (Go structs, CRDs, dependencies, controllers)
-- `inference/` - Analysis (component boundaries, service roles)
-- `synthesis/` - Generation (component docs, AGENTS.md)
-- `linking/` - Navigation (cross-links, concept mapping)
-- `validation/` - Quality (navigation depth, quality score)
-- `documentation/` - File operations (write with validation)
-- `openshift/` - OpenShift-specific patterns
-- `monitoring/` - Logging and tracking
-
-### 4. Use the System
-
-To generate documentation for an OpenShift repository:
+### 2. Installation
 
 ```bash
-# Navigate to target repository
-cd /path/to/openshift/repository
+# Clone repository
+git clone https://github.com/kenjpais/claude-agent-knowledge-skills
+cd claude-agent-knowledge-system-skills
 
-# Use Claude Code to invoke the orchestrator
-# Claude prompt: "Run the orchestrator agent to generate agentic documentation"
+# Install dependencies
+make install
+
+# Install development dependencies (optional, for testing)
+make install-dev
 ```
 
-The system will:
-1. Extract all components, CRDs, and dependencies
-2. Synthesize documentation following templates
-3. Link documentation into navigable structure
-4. Validate quality and enforce constraints
-5. Output to `agentic/` directory
+### 3. Configuration (Optional)
 
-## Directory Structure
+For GitHub data ingestion with higher rate limits:
+
+```bash
+# Copy environment template
+cp .env.example .env
+
+# Edit .env and add your GitHub token
+# GH_API_TOKEN=ghp_your_token_here
+```
+
+### 4. Use Skills in Claude Code
+
+Open Claude Code and use the core skills:
+
+```bash
+# In Claude Code
+/create                    # Generate agentic documentation
+/validate                  # Validate documentation quality
+/evaluate                  # Test with coding agent simulation
+/ask what components exist?  # Query documentation
+```
+
+---
+
+## 🎯 Core Skills
+
+### `/create` - Generate Documentation
+
+**What it does**: Generates complete agentic documentation for a repository
+
+**How to use**:
+```bash
+# In Claude Code, in any repository directory
+/create
+```
+
+**What happens**:
+1. **Extraction** - Discovers structure, parses Go/CRDs, builds dependency graph
+2. **Synthesis** - Infers components, generates component/concept docs
+3. **Linking** - Creates AGENTS.md, cross-links all documentation
+4. **Validation** - Checks ≤3 hop navigation, line budgets, quality score
+
+**Output**:
+```
+repository/
+├── AGENTS.md                    # Entry point (≤150 lines)
+└── agentic/
+    ├── design-docs/components/  # Component docs (≤100 lines each)
+    ├── domain/concepts/         # Domain concepts (≤75 lines each)
+    └── QUALITY_SCORE.md
+```
+
+**Duration**: ~2-3 minutes for typical OpenShift repository
+
+### `/validate` - Validate Quality
+
+**What it does**: Validates existing agentic documentation
+
+**How to use**:
+```bash
+# In repository with existing agentic docs
+/validate
+```
+
+**Checks**:
+- ✅ Structure (AGENTS.md exists, required files present)
+- ✅ Navigation depth (≤3 hops from AGENTS.md)
+- ✅ Line budgets (AGENTS.md ≤150, components ≤100, concepts ≤75)
+- ✅ Broken links (all cross-references valid)
+- ✅ Coverage (≥80% components documented)
+- ✅ Freshness (updated within 90 days)
+- ✅ Quality score (≥70/100 to pass)
+
+### `/evaluate` - Test with Coding Agent
+
+**What it does**: Spawns a coding sub-agent to test documentation quality
+
+**How to use**:
+```bash
+# In repository with agentic docs
+/evaluate
+```
+
+**Test scenarios** (5 total):
+1. New feature - "Add ARM64 support"
+2. Bug fix - "Fix memory leak in pod inspector"
+3. Refactor - "Implement LRU cache eviction"
+4. Code review - "Review pod placement config"
+5. Architecture - "Explain multi-arch scheduling"
+
+**Metrics tracked**:
+- Hops (navigation depth)
+- Time (query response time)
+- Confidence (agent's confidence level)
+- Retrieval quality
+
+**Success criteria**: 80% scenarios pass, avg ≤2.5 hops, ≤120s, ≥80% confidence
+
+### `/ask` - Query Documentation
+
+**What it does**: Query agentic documentation with ≤3 hop navigation
+
+**How to use**:
+```bash
+# In repository with agentic docs
+/ask what components exist?
+/ask how does the installer work?
+/ask what is the reconciliation pattern?
+```
+
+**Query types**:
+- Component discovery
+- Component details
+- Concept lookup
+- Architecture overview
+- Development guidance
+- Relationship queries
+
+---
+
+## 📖 How It Works
+
+### Skill-Driven Architecture
+
+**Core principle**: All intelligence is expressed through composable skills. Claude Code loads and executes skills.
+
+```
+User types: /create
+    ↓
+Claude Code loads skill: skills/create-agentic-docs/SKILL.md
+    ↓
+Claude executes workflow defined in skill
+    ↓
+Output: Complete agentic documentation
+```
+
+### The 7 Core Skills
+
+**User-Invocable Skills** (4):
+- `/create` - `create-agentic-docs` - Generate complete agentic documentation
+- `/validate` - `validate-agentic-docs` - Validate documentation quality
+- `/evaluate` - `evaluate-agentic-docs` - Test with coding agent simulation
+- `/ask` - `ask-agentic-docs` - Query documentation
+
+**Data & Knowledge Graph Skills** (3):
+- `ingest-github-data` - Fetch GitHub PRs/issues and JIRA references via GraphQL API
+- `generate-knowledge-graph` - Create NetworkX-based knowledge graph from docs + database
+- `retrieve-from-graph` - Graph-based retrieval with ≤3 hop navigation
+
+**See**: `skill-registry/index.yaml` for complete skill catalog
+
+---
+
+## 🛠️ System Architecture
+
+### Directory Structure
 
 ```
 claude-agent-knowledge-system-skills/
-├── agents/                  # Agent definitions (7 agents)
-├── skills/                  # Skill definitions (20+ skills)
-├── skill-registry/          # Skill index and mappings
-├── templates/               # Documentation templates
-│   ├── agentic-structure/  # Output templates
-│   └── exec-plans/         # Execution plan templates
-├── utilities/               # Supporting utilities
-│   ├── logging/            # Structured logging
-│   └── validation/         # Quality validation
-├── integrations/            # External integrations
-│   ├── github/             # GitHub MCP integration
-│   ├── jira/               # JIRA MCP integration
-│   └── graphify/           # Knowledge graph integration
-├── AGENT_KNOWLEDGE_FRAMEWORK.md  # Architecture specification
-├── GOAL.md                       # Project objectives
-├── CLAUDE.md                     # Implementation guide
-└── README.md                     # This file
+├── skills/                      # Core skill definitions
+│   ├── create-agentic-docs/    # /create skill
+│   ├── validate-agentic-docs/  # /validate skill
+│   ├── evaluate-agentic-docs/  # /evaluate skill
+│   ├── ask-agentic-docs/       # /ask skill
+│   ├── ingest-github-data/     # GitHub + JIRA data ingestion
+│   ├── generate-knowledge-graph/ # Knowledge graph generation
+│   ├── retrieve-from-graph/    # Graph-based retrieval
+│   ├── documentation/          # Documentation utilities
+│   ├── inference/              # Component inference
+│   ├── linking/                # Cross-linking
+│   ├── monitoring/             # Operation logging
+│   ├── openshift/              # OpenShift-specific patterns
+│   ├── parsing/                # Code parsing
+│   ├── repo/                   # Repository access
+│   ├── synthesis/              # Doc generation
+│   └── validation/             # Quality validation
+├── templates/                  # Documentation templates
+│   └── agentic-structure/
+├── skill-registry/             # Skill index
+│   └── index.yaml
+├── integrations/               # External integrations
+│   ├── storage/                # GitHub/JIRA SQLite storage
+│   └── graphify/               # Graphify tool integration
+├── tests/                      # Test suite
+│   ├── unit/
+│   └── integration/
+└── Makefile                    # Build and development commands
 ```
 
-## Generated Documentation Structure
+### Quality Guarantees
 
-When run on a target repository, the system generates:
+**Navigation Constraint**:
+- ✅ Any information reachable in ≤3 hops from AGENTS.md
+- ✅ No orphaned documents
 
-```
-target-repository/
-├── AGENTS.md                    # Primary entry point (≤150 lines)
-└── agentic/
-    ├── DESIGN.md               # Design philosophy
-    ├── DEVELOPMENT.md          # Dev setup
-    ├── TESTING.md              # Test strategy
-    ├── RELIABILITY.md          # SLOs and observability
-    ├── SECURITY.md             # Security model
-    ├── QUALITY_SCORE.md        # Quality metrics
-    ├── design-docs/
-    │   ├── components/         # Component documentation (≤100 lines each)
-    │   └── core-beliefs.md
-    ├── domain/
-    │   ├── concepts/           # Domain concepts (≤75 lines each)
-    │   └── workflows/          # Workflow documentation
-    ├── decisions/              # Architecture Decision Records
-    └── exec-plans/             # Execution tracking
-        ├── active/
-        └── completed/
-```
+**Context Budget**:
+- ✅ AGENTS.md ≤150 lines
+- ✅ Component docs ≤100 lines each
+- ✅ Concept docs ≤75 lines each
+- ✅ Total query context ≤500 lines
 
-## Quality Metrics
+**Quality Score** (0-100):
+- Coverage: 40 points (≥80% components documented)
+- Freshness: 20 points (updated <90 days)
+- Completeness: 20 points (all required files)
+- Linkage: 10 points (no broken links)
+- Navigation: 10 points (≤3 hop depth)
+- **Pass threshold**: ≥70/100
 
-Documentation quality is scored across 5 dimensions:
-- **Coverage** (40 points): % of components documented
-- **Freshness** (20 points): Docs updated within 90 days  
-- **Completeness** (20 points): Required files present
-- **Linkage** (10 points): No broken links
-- **Navigation** (10 points): All docs reachable in ≤3 hops
+---
 
-**Pass threshold**: 70/100
+## 📚 Documentation
 
-## Key Constraints
+### User Guides
+- **[WORKFLOW_EXPLAINED.md](WORKFLOW_EXPLAINED.md)** - Complete workflow explanation
+- **[CORE_SKILLS.md](CORE_SKILLS.md)** - Detailed skill reference
+- **[USAGE.md](USAGE.md)** - Usage examples
 
-The system enforces strict constraints for agent-optimized documentation:
+### Architecture
+- **[AGENT_KNOWLEDGE_FRAMEWORK.md](AGENT_KNOWLEDGE_FRAMEWORK.md)** - System design
+- **[SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md)** - Complete system reference
+- **[CLAUDE.md](CLAUDE.md)** - Claude Code guidance
 
-| Constraint | Requirement | Validation |
-|------------|-------------|------------|
-| **Navigation Depth** | ≤3 hops from AGENTS.md | Automatic validation |
-| **AGENTS.md Length** | ≤150 lines | Line count check |
-| **Component Doc Length** | ≤100 lines | Line count check |
-| **Concept Doc Length** | ≤75 lines | Line count check |
-| **Required Files** | 7 files (AGENTS.md + 6 in agentic/) | File existence check |
-| **Broken Links** | 0 broken links | Link validation |
+### Development
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - How to contribute
+- **[DEPENDENCY_MANAGEMENT.md](DEPENDENCY_MANAGEMENT.md)** - Dependencies
 
-## Integration Points
+### Integration
+- **[integrations/storage/README.md](integrations/storage/README.md)** - GitHub/JIRA ingestion
+- **[integrations/graphify/README.md](integrations/graphify/README.md)** - Knowledge graphs
 
-### GitHub & JIRA Data Storage ⭐
-Efficient single-repository ingestion using GitHub GraphQL API with date range filtering:
-- **GitHub**: PRs and issues within specified date range (default: past year)
-- **JIRA**: Automatic extraction and correlation of JIRA references
-- **Storage**: Local SQLite database for fast queries
-- **Date Filtering**: Flexible date ranges (YYYY-MM-DD or "N-days-ago")
+---
 
-**Quick Usage**:
+## 🔧 Optional Configuration
+
+### GitHub Token (Optional)
+
+For higher API rate limits when ingesting GitHub data:
+
 ```bash
-# Ingest last year of data (default)
-python integrations/storage/ingest.py openshift/installer --jira OCPCLOUD
+# Copy template
+cp .env.example .env
 
-# Ingest specific date range
-python integrations/storage/ingest.py openshift/installer \
-  --since 2024-01-01 \
-  --until 2024-12-31
-
-# Ingest last 90 days
-python integrations/storage/ingest.py openshift/installer \
-  --since 90-days-ago
+# Add your GitHub token
+echo "GH_API_TOKEN=ghp_your_token" >> .env
 ```
 
 **Benefits**:
-- ✅ 50-100x fewer API requests vs REST (uses GraphQL)
-- ✅ Date range filtering for targeted analysis
-- ✅ Automatic GitHub ↔ JIRA correlation
-- ✅ Local SQLite storage (~10MB per repo)
+- 5,000 requests/hour (vs 60 without token)
+- Access to private repositories
 
-**See**: `integrations/storage/README.md` for complete documentation
+**Get token**: https://github.com/settings/tokens (scopes: `repo`, `read:org`)
 
-### GitHub MCP Server ✅
-Extract architectural context from:
-- Pull request descriptions and reviews
-- Commit messages and history
-- Issue discussions
-- Code review comments
+### JIRA Access (Optional)
 
-**Setup**: Automatic via `./setup.sh`  
-**Auth**: Optional (GITHUB_TOKEN for private repos)
+For private JIRA instances, add credentials to `.env`:
 
-See `integrations/github/GITHUB_MCP_INTEGRATION.md`
-
-### JIRA - Simplified! 🎉
-Extract product context from:
-- Feature requirements and acceptance criteria
-- Bug patterns and trends
-- Epic descriptions
-- Sprint planning
-
-**Setup**: ✅ **No setup needed for public JIRA!**  
-**Auth**: ❌ **Not required for issues.redhat.com and other public instances**  
-**Private JIRA**: Optional authentication (see guide)
-
-See `integrations/jira/SIMPLIFIED_SETUP.md`
-
-### Graphify
-Generate knowledge graphs for:
-- Community detection (component boundaries)
-- Concept extraction
-- Relationship mapping
-- Query-based navigation
-
-See `integrations/graphify/GRAPHIFY_SKILL.md`
-
-## Utilities
-
-### Logging
-All operations are logged with structured metadata:
-```python
-from utilities.logging.logger import get_logger
-
-logger = get_logger("agent-name")
-logger.log_start("operation", "resource")
-logger.log_success("operation", "resource", duration_ms=100)
+```bash
+JIRA_URL=https://your-jira.com
+JIRA_EMAIL=your-email@company.com
+JIRA_API_TOKEN=your-token
 ```
 
-### Validation
-Quality validation utilities:
-```python
-from utilities.validation.validator import QualityScoreCalculator
+Public JIRA (issues.redhat.com) requires no authentication.
 
-calculator = QualityScoreCalculator(repo_path, agentic_dir)
-scores = calculator.calculate()
+---
+
+## 💡 Example Session
+
+```bash
+# 1. Clone this repository
+git clone <this-repo>
+cd claude-agent-knowledge-system-skills
+
+# 2. Open Claude Code in target repository
+cd /path/to/openshift-installer
+
+# 3. Use skills in Claude Code
+# Type in Claude Code:
+/create
+
+# Claude generates documentation automatically:
+# ✅ AGENTS.md created (142 lines)
+# ✅ 5 component docs generated (avg 87 lines)
+# ✅ 3 concept docs generated (avg 62 lines)
+# ✅ Navigation depth: 3 hops
+# ✅ Quality score: 90/100
+
+# 4. Validate
+/validate
+# ✅ All checks passed
+# ✅ Quality score: 90/100
+
+# 5. Query
+/ask how does the installer work?
+# Returns: Purpose, responsibilities, dependencies, workflow
+# Navigation path: AGENTS.md → Components → Installer (2 hops)
+
+# 6. Evaluate
+/evaluate
+# ✅ 4/5 scenarios passed
+# ✅ Average hops: 2.4
+# ✅ Average time: 98.5s
+# ✅ Average confidence: 82%
 ```
 
-## Design Principles
+---
 
-1. **Progressive Disclosure** - Navigate hierarchically, load minimal context
-2. **Skill-Based Intelligence** - All intelligence in skills, agents only coordinate
-3. **Deterministic Extraction** - Parsing is deterministic, inference is confidence-scored
-4. **Template Enforcement** - All docs follow strict templates with line budgets
-5. **Validation First** - All outputs validated before considered complete
-6. **Continuous Maintenance** - Documentation stays fresh through curator agent
+## 🎓 Key Concepts
 
-## References
+### Progressive Disclosure
 
-- **Agentic Docs Framework**: https://github.com/Prashanth684/agentic-docs-guide
-- **Agent Skills Pattern**: https://github.com/addyosmani/agent-skills
-- **Graphify**: https://github.com/safishamsi/graphify
-- **Claude Skills Guide**: https://resources.anthropic.com/hubfs/The-Complete-Guide-to-Building-Skill-for-Claude.pdf
+Information organized in layers:
+- **Hop 0**: AGENTS.md (high-level overview)
+- **Hop 1**: Component/concept lists
+- **Hop 2**: Detailed documentation
+- **Hop 3**: Implementation details
+
+### Skill-Driven Architecture
+
+All intelligence is expressed through composable skills:
+```
+User invokes skill → /create
+                      ↓
+Claude Code loads skill definition
+                      ↓
+Skill specifies workflow & constraints
+                      ↓
+Claude executes workflow
+                      ↓
+Output: Documentation + validation
+```
+
+### Quality-First Approach
+
+Every output validated:
+- Navigation depth checked (≤3 hops)
+- Line budgets enforced (AGENTS.md ≤150, components ≤100, concepts ≤75)
+- Quality score calculated (≥70/100 to pass)
+- Broken links detected (0 broken links required)
+
+---
+
+## 🛠️ Development
+
+### Building and Testing
+
+```bash
+# Format code
+make format
+
+# Run linters
+make lint
+
+# Run tests
+make test
+
+# Clean build artifacts
+make clean
+```
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest tests/ -v
+
+# Run specific test file
+pytest tests/unit/test_database.py -v
+
+# Run with coverage
+pytest tests/ -v --cov=integrations --cov=utilities --cov-report=html
+```
+
+---
+
+## 🆘 Troubleshooting
+
+### "Skill not found"
+
+Make sure you're in the skills directory or Claude Code can access the skills:
+```bash
+# Check you're in the right directory
+pwd  # Should show claude-agent-knowledge-system-skills
+
+# Or reference skills explicitly
+/create using skills/create-agentic-docs/SKILL.md
+```
+
+### "Documentation not found"
+
+Run `/create` first to generate documentation:
+```bash
+/create
+# Then you can use /validate, /evaluate, /ask
+```
+
+### Low quality score
+
+Check specific issues:
+```bash
+/validate
+# See which checks failed
+# Common issues: stale docs, missing files, broken links
+```
+
+---
+
+## 🤝 Contributing
+
+See **[CONTRIBUTING.md](CONTRIBUTING.md)** for guidelines.
+
+**Adding new skills**:
+1. Create `skills/category/skill-name/SKILL.md`
+2. Add frontmatter with metadata
+3. Document skill thoroughly
+4. Add to `skill-registry/index.yaml`
+5. Test with Claude Code
+
+---
+
+## 📄 License
+
+See LICENSE file for details.
+
+---
+
+## 🔗 Links
+
+- **Claude Code**: https://claude.ai/code
+- **Agent Knowledge Framework**: See AGENT_KNOWLEDGE_FRAMEWORK.md
+- **Skill Reference**: See CORE_SKILLS.md
+- **Issues**: https://github.com/kenjpais/claude-agent-knowledge-skills/issues
+
+---
+
+**Ready to use** | **Skill-driven** | **Quality-first** | **OpenShift optimized**

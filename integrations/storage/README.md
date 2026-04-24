@@ -8,7 +8,7 @@ This system ingests GitHub and JIRA data for a **single repository** using GitHu
 
 ✅ **GitHub GraphQL API** - Efficient data ingestion with pagination  
 ✅ **Date Range Filtering** - Ingest data from specific time periods (default: past year)  
-✅ **JIRA Ingestion** - Issues via JIRA MCP server or public API  
+✅ **JIRA Ingestion** - Issues via public JIRA REST API  
 ✅ **Automatic Correlation** - Extracts JIRA keys from GitHub data  
 ✅ **Local SQLite Storage** - Lightweight, no external database required  
 ✅ **Fast Retrieval** - Indexed queries for agent use  
@@ -18,14 +18,38 @@ This system ingests GitHub and JIRA data for a **single repository** using GitHu
 
 ## 🚀 Quick Start
 
-### 1. Initialize Database
+### 1. Setup Authentication (Recommended)
+
+Create a `.env` file in the project root:
+
+```bash
+# Copy the example file
+cp .env.example .env
+
+# Edit .env and add your GitHub token
+# GH_API_TOKEN=ghp_your_token_here
+```
+
+**Get a GitHub token:**
+1. Go to https://github.com/settings/tokens
+2. Click "Generate new token (classic)"
+3. Select scopes: `repo`, `read:org`
+4. Copy the token to `.env` file
+
+**Why use a token?**
+- ✅ **5,000 requests/hour** (vs 60 without token)
+- ✅ **Access private repositories**
+- ✅ **Avoid rate limit errors**
+- ✅ **Better reliability** during API issues
+
+### 2. Initialize Database
 
 ```bash
 # Database is automatically created on first use
 # Default location: ~/.agent-knowledge/data.db
 ```
 
-### 2. Ingest Repository Data
+### 3. Ingest Repository Data
 
 ```bash
 # Ingest last year of data (default)
@@ -50,7 +74,7 @@ python integrations/storage/ingest.py openshift/installer \
 # 5. Create correlations
 ```
 
-### 3. Query Data
+### 4. Query Data
 
 ```python
 from integrations.storage.database import KnowledgeDatabase
@@ -407,9 +431,13 @@ for pr in prs:
 - **Read-only**: Ingestion uses read-only APIs
 
 ### API Tokens
-- **GitHub**: Optional, only for private repos and higher rate limits
+- **GitHub**: Token loaded from `.env` file (recommended for higher rate limits)
+  - Create `.env` file in project root: `cp .env.example .env`
+  - Add your token: `GH_API_TOKEN=ghp_your_token_here`
+  - Get token at: https://github.com/settings/tokens
 - **JIRA**: Not needed for public instances (issues.redhat.com)
-- **Storage**: Tokens NOT stored in database
+- **Storage**: Tokens NOT stored in database, only in `.env` file
+- **Security**: `.env` file is in `.gitignore` to prevent accidental commits
 
 ### Data Retention
 - **Manual cleanup**: Delete database file to clear all data
@@ -429,7 +457,14 @@ DELETE FROM jira_issues WHERE created_at < date('now', '-1 year');
 Install GitHub CLI: https://cli.github.com
 
 ### "Rate limit exceeded"
-Set GITHUB_TOKEN environment variable for higher limits (5000 req/hour)
+Add GitHub token to `.env` file for higher limits (5000 req/hour):
+```bash
+# Create .env file
+cp .env.example .env
+
+# Add your token
+echo "GH_API_TOKEN=ghp_your_token_here" > .env
+```
 
 ### "Database locked"
 Close other connections to the database
@@ -450,8 +485,6 @@ GitHub data may not reference JIRA issues - check PR/issue titles and bodies
 ## 📚 References
 
 - Database schema: `schema.sql`
-- GitHub MCP: `../github/GITHUB_MCP_INTEGRATION.md`
-- JIRA integration: `../jira/SIMPLIFIED_SETUP.md`
 - Agent integration: `../../agents/extractor/AGENT.md`
 
 ---

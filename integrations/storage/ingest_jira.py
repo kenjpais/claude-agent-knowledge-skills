@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-JIRA data ingestion using JIRA MCP server or public API.
+JIRA data ingestion using public JIRA REST API.
 Fetches issues referenced by GitHub items and enriches correlation.
 """
 

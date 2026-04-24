@@ -4,309 +4,399 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This repository contains the **Agent Knowledge Framework** - a specification for automatically generating and maintaining agentic documentation for OpenShift codebases. The goal is to enable coding agents to:
+This repository is a **skill library** for Claude Code containing 40+ skills for generating and maintaining agentic documentation for OpenShift codebases.
 
-- Navigate systems in three hops or less
-- Understand architectural intent, not just code structure  
-- Reuse patterns consistently
-- Avoid violating invariants
+**Key principle**: All intelligence is expressed through composable skills. Claude Code loads and executes skills.
 
-**Current State**: The system is now implemented with complete agent definitions, skills, templates, and utilities.
+**No installation required** - This is a ready-to-use skill library.
 
-## High-Level Architecture
+## Core Skills (User-Invocable)
 
-The framework defines a five-layer system:
+### `/create` - Generate Agentic Documentation
 
-1. **Orchestration Layer** - Triggers and coordinates documentation generation
-2. **Extraction Agents** - Mine raw repository data (API surfaces, dependency graphs, CRDs)
-3. **Synthesis Agents** - Convert extracted data into domain concepts and component descriptions
-4. **Skill Layer** - Atomic, composable capabilities (all intelligence expressed here; agents only coordinate)
-5. **Validation Layer** - Enforce navigation depth, context budgets, and structural completeness
+**Location**: `skills/create-agentic-docs/SKILL.md`
 
-**Core Pipeline**: Raw Code → Extract Signals → Infer Meaning → Synthesize Documents → Link Knowledge → Validate → Store in `agentic/`
+**What to do**: When the user types `/create`, invoke this skill using the Skill tool before doing anything else.
 
-## Agent Roles
-
-- **Orchestrator**: Triggers generation, assigns scopes, sequences agents
-- **Extractor**: Mines repository data using parsing skills only (no interpretation)
-- **Synthesizer**: Converts extracted data into concepts, workflows, and descriptions
-- **Linker**: Creates navigable knowledge graph via cross-links and AGENTS.md
-- **Validator**: Enforces framework constraints (≤3 hop navigation, context budget, completeness)
-- **Curator**: Maintains freshness, updates docs on code changes, prunes stale knowledge
-
-## Skill Design Principles
-
-All skills must follow strict guidelines:
-
-- **Single responsibility** - One clear purpose per skill
-- **Clear input/output schema** - Explicit contracts
-- **No hidden state** - Stateless and deterministic where possible
-- **Small context footprint** - Aggressive chunking required
-
-Skill categories include: repo access, parsing (extract structure), inference (derive meaning), synthesis (generate docs), linking (create navigation), validation (enforce quality), and OpenShift-specific skills.
-
-## OpenShift-Specific Considerations
-
-The framework is optimized for Kubernetes-heavy OpenShift codebases and requires specialized skills for:
-
-- Parsing controller patterns and reconcile loops
-- Extracting CRDs and mapping them to controllers
-- Inferring operator lifecycles
-- Detecting cluster configuration flows
-
-## Repository Structure
-
-```
-claude-agent-knowledge-system-skills/
-├── agents/                  # Agent definitions
-│   ├── orchestrator/       # Coordinates documentation generation
-│   ├── extractor/          # Mines repository data
-│   ├── synthesizer/        # Generates documentation from data
-│   ├── linker/             # Creates navigation structure
-│   ├── validator/          # Validates quality and structure
-│   ├── curator/            # Maintains documentation freshness
-│   └── retrieval/          # Provides documentation access
-├── skills/                 # Skill definitions (atomic capabilities)
-│   ├── repo/              # Repository access (read, list, search, git)
-│   ├── parsing/           # Extract structure (Go structs, CRDs, dependencies)
-│   ├── inference/         # Derive meaning (boundaries, roles)
-│   ├── synthesis/         # Generate docs (components, AGENTS.md)
-│   ├── linking/           # Create navigation (cross-links)
-│   ├── validation/        # Quality checks (depth, score)
-│   ├── documentation/     # File operations (write, update)
-│   ├── openshift/         # OpenShift-specific (controller patterns)
-│   └── monitoring/        # Logging and tracking
-├── skill-registry/        # Skill index and mappings
-│   └── index.yaml
-├── templates/             # Documentation templates
-│   ├── agentic-structure/ # Templates for generated docs
-│   └── exec-plans/        # Execution plan templates
-├── utilities/             # Supporting utilities
-│   ├── logging/           # Structured logging (logger.py)
-│   └── validation/        # Quality validation (validator.py)
-├── integrations/          # External integrations
-│   ├── github/            # GitHub MCP server integration
-│   ├── jira/              # JIRA MCP server integration
-│   └── graphify/          # Graphify knowledge graph integration
-└── agentic/               # Generated documentation (created when run)
-```
-
-## Implementation Guidance
-
-When building components of this system:
-
-- **Progressive disclosure**: Start with directory structure, then component extraction, then concept synthesis
-- **Continuous update model**: Generate diffs on changes and update only affected documentation
-- **Validation first**: Every output must pass navigation depth (≤3 hops) and context budget checks
-- **Execution plans**: Document generation itself follows the framework - create execution plans in `agentic/exec-plans/active/`
-- **Quality tracking**: Maintain `agentic/QUALITY_SCORE.md` with metrics on coverage and staleness
-
-## 🚀 Quick Setup
-
-**TL;DR**: Clone, run `./setup.sh`, and start generating docs!
-
+**Usage**:
 ```bash
-git clone <repo>
-cd claude-agent-knowledge-system-skills
-./setup.sh
-export GITHUB_TOKEN=ghp_xxx  # Optional
-agentic-docs generate /path/to/openshift-repo
+# User types in Claude Code:
+/create
 ```
 
-**See [GETTING_STARTED.md](GETTING_STARTED.md) for detailed setup guide.**
+**Workflow**:
+1. Extract repository structure (list files, parse Go/CRDs)
+2. Infer component boundaries and roles
+3. Generate component documentation (≤100 lines each)
+4. Generate AGENTS.md entry point (≤150 lines)
+5. Create cross-links between docs
+6. Validate ≤3 hop navigation and quality score
 
----
+**Output**:
+- `AGENTS.md` - Entry point
+- `agentic/design-docs/components/` - Component docs
+- `agentic/domain/concepts/` - Concept docs
+- `agentic/QUALITY_SCORE.md` - Quality metrics
 
-## How to Use This System
+**Constraints**:
+- AGENTS.md ≤150 lines
+- Component docs ≤100 lines each
+- Concept docs ≤75 lines each
+- Navigation depth ≤3 hops
+- Quality score ≥70/100
 
-### Prerequisites
-- **Python 3.9+** (for utilities) - Required
-- **Claude Code** - Required - Install from https://claude.ai/code
-- **Node.js/npm** (for GitHub MCP) - Optional
-- **GitHub Token** - Optional (for private repos and higher limits)
-- **JIRA** - ✅ **No auth needed for public JIRA!**
-- **Graphify** - Optional (for knowledge graphs)
+### `/validate` - Validate Documentation Quality
 
-### Automated Setup (Recommended)
+**Location**: `skills/validate-agentic-docs/SKILL.md`
 
+**Usage**:
 ```bash
-# Run the setup script
-./setup.sh
-
-# This automatically:
-# ✅ Installs Python dependencies
-# ✅ Configures MCP servers
-# ✅ Creates CLI commands
-# ✅ Sets up environment
+# User types in Claude Code:
+/validate
 ```
 
-### Manual Setup (if needed)
+**What to check**:
+1. AGENTS.md exists and ≤150 lines
+2. Required files present (DESIGN, DEVELOPMENT, TESTING, RELIABILITY, SECURITY)
+3. Navigation depth ≤3 hops from AGENTS.md
+4. No broken links
+5. Component coverage ≥80%
+6. Documentation freshness <90 days
+7. Quality score ≥70/100
 
-1. **Install Python dependencies**:
+**Output**: Pass/fail with quality score and recommendations
+
+### `/evaluate` - Test with Coding Agent Simulation
+
+**Location**: `skills/evaluate-agentic-docs/SKILL.md`
+
+**Usage**:
 ```bash
-pip install pyyaml
+# User types in Claude Code:
+/evaluate
 ```
 
-2. **Configure MCP servers**:
+**What to do**: Spawn a sub-agent using the Agent tool with these constraints:
+- Sub-agent can ONLY use `ask-agentic-docs` skill
+- Sub-agent CANNOT access source code directly
+- Sub-agent must navigate documentation within ≤3 hops
+- Sub-agent must stay within 500 line context budget
+
+**Test scenarios**:
+1. New feature: "Add ARM64 support"
+2. Bug fix: "Fix memory leak in pod inspector"
+3. Refactor: "Implement LRU cache eviction"
+4. Code review: "Review pod placement config"
+5. Architecture: "Explain multi-arch scheduling"
+
+**Success criteria**: 80% scenarios pass, avg ≤2.5 hops, ≤120s, ≥80% confidence
+
+### `/ask` - Query Documentation
+
+**Location**: `skills/ask-agentic-docs/SKILL.md`
+
+**Usage**:
 ```bash
-# GitHub MCP (optional)
-mkdir -p ~/.claude
-cat > ~/.claude/mcp_servers.json << 'EOF'
-{
-  "mcpServers": {
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {"GITHUB_TOKEN": "${GITHUB_TOKEN}"}
-    }
-  }
-}
-EOF
+# User types in Claude Code:
+/ask what components exist?
+/ask how does the installer work?
+/ask what is the reconciliation pattern?
 ```
 
-3. **Set environment variables**:
-```bash
-# GitHub (optional - for private repos)
-export GITHUB_TOKEN=ghp_your_token_here
+**How to answer**:
+1. Parse query to identify query type (component, concept, architecture, etc.)
+2. Start from AGENTS.md (hop 0)
+3. Navigate to relevant documentation (≤3 hops)
+4. Return answer with context (≤500 lines)
+5. Include related links and navigation path
 
-# JIRA - NOT NEEDED for public JIRA (issues.redhat.com)!
-# Only set these for private JIRA instances:
-# export JIRA_URL=https://your-jira.com
-# export JIRA_EMAIL=your-email@company.com
-# export JIRA_API_TOKEN=your-token
-```
+**Query types**:
+- Component discovery
+- Component details
+- Concept lookup
+- Architecture overview
+- Development guidance
+- Relationship queries
 
-### Running Documentation Generation
+## Skill Categories
 
-#### For a Target OpenShift Repository
-
-1. **Full Documentation Generation**:
-```bash
-# Navigate to target OpenShift repository
-cd /path/to/openshift-repository
-
-# Invoke Claude Code with orchestrator agent
-# The orchestrator will:
-# - Discover repository structure
-# - Run extractor agent on all components
-# - Run synthesizer agent to create docs
-# - Run linker agent to create navigation
-# - Run validator agent to check quality
-
-# Claude prompt:
-"Run the orchestrator agent to generate complete agentic documentation for this OpenShift repository"
-```
-
-2. **Incremental Update** (after code changes):
-```bash
-# Claude prompt:
-"Run the curator agent to update documentation for recently changed components"
-```
-
-3. **Validation Only**:
-```bash
-# Claude prompt:
-"Run the validator agent to check documentation quality"
-```
-
-### Agent Usage
-
-#### Orchestrator
-**Purpose**: Coordinate entire documentation pipeline
-**When to use**: Initial generation, full regeneration
-**Skills used**: discovery, coordination, validation
-
-#### Extractor  
-**Purpose**: Extract raw data from code
-**When to use**: Processing source files, extracting CRDs, building dependency graphs
-**Skills used**: read-file, extract-go-structs, extract-kubernetes-crds, build-dependency-graph
-
-#### Synthesizer
-**Purpose**: Generate documentation from extracted data
-**When to use**: After extraction, to create component and concept docs
-**Skills used**: infer-component-boundary, classify-service-role, generate-component-doc
-
-#### Linker
-**Purpose**: Create navigation structure
-**When to use**: After synthesis, to create AGENTS.md and cross-links
-**Skills used**: link-concepts-to-components, generate-agents-md, check-navigation-depth
-
-#### Validator
-**Purpose**: Enforce quality constraints
-**When to use**: After linking, to validate structure and quality
-**Skills used**: check-navigation-depth, check-quality-score
-
-#### Curator
-**Purpose**: Maintain documentation over time
-**When to use**: Continuous monitoring, detecting staleness
-**Skills used**: get-git-history, check-quality-score
-
-#### Retrieval
-**Purpose**: Provide controlled access to documentation
-**When to use**: When agents need to query documentation
-**Skills used**: read-file, search-code (all queries logged)
-
-### Skill Reference
-
-All skills documented in `skills/` directory. Key skills:
-
-**Repository Access**:
+### Repository Access Skills (`skills/repo/`)
 - `read-file` - Read file contents
-- `list-files` - Discover files  
-- `search-code` - Search for patterns
+- `list-files` - Discover files with filtering
+- `search-code` - Search for code patterns
 - `get-git-history` - Extract commit history
 
-**Parsing** (deterministic extraction):
-- `extract-go-structs` - Parse Go types
-- `extract-kubernetes-crds` - Parse CRD definitions
-- `build-dependency-graph` - Build import graph
+### Parsing Skills (`skills/parsing/`)
+- `extract-go-structs` - Parse Go types (deterministic)
+- `extract-kubernetes-crds` - Parse CRD definitions (deterministic)
+- `build-dependency-graph` - Build import graph (deterministic)
 - `parse-kubernetes-controller-pattern` - Extract controller structure
 
-**Inference** (probabilistic, confidence-scored):
-- `infer-component-boundary` - Detect component boundaries
-- `classify-service-role` - Determine component role
+### Inference Skills (`skills/inference/`)
+- `infer-component-boundary` - Detect component boundaries (probabilistic, confidence-scored)
+- `classify-service-role` - Determine component role (probabilistic, confidence-scored)
 
-**Synthesis** (generate docs):
+### Synthesis Skills (`skills/synthesis/`)
 - `generate-component-doc` - Create component documentation
 - `generate-agents-md` - Create AGENTS.md entry point
 
-**Validation** (quality enforcement):
-- `check-navigation-depth` - Enforce ≤3 hop constraint
-- `check-quality-score` - Calculate comprehensive metrics
+### Linking Skills (`skills/linking/`)
+- `link-concepts-to-components` - Create bidirectional cross-links
 
-**Documentation**:
-- `write-agentic-file` - Write/update docs with validation
+### Validation Skills (`skills/validation/`)
+- `check-navigation-depth` - Enforce ≤3 hop constraint (critical)
+- `check-quality-score` - Calculate comprehensive quality metrics (critical)
 
-**Monitoring**:
+### Documentation Skills (`skills/documentation/`)
+- `write-agentic-file` - Write/update files in agentic/ directory with validation
+
+### Knowledge Graph Skills (`skills/knowledge-graph/`)
+- `generate-knowledge-graph` - Create queryable graph from docs + database
+- `retrieve-from-graph` - Graph-based retrieval with ≤3 hops, ≤500 lines context
+
+### Data Ingestion Skills (`skills/data-ingestion/`)
+- `ingest-github-data` - Fetch GitHub PRs, issues, JIRA references → SQLite
+
+### Evaluation Skills (`skills/evaluation/`)
+- `evaluate-agentic-docs` - Coding agent simulation with test scenarios
+
+### Monitoring Skills (`skills/monitoring/`)
 - `log-operation` - Log all operations (mandatory)
 
-### Validation and Quality
+**Complete catalog**: See `skill-registry/index.yaml`
 
-Quality score calculated from:
-- **Coverage** (40 points): % of components documented
-- **Freshness** (20 points): Docs updated within 90 days
-- **Completeness** (20 points): Required files present
-- **Linkage** (10 points): No broken links
-- **Navigation** (10 points): ≤3 hop depth
+## Agent Definitions
 
-**Pass threshold**: 70/100
+Seven agents coordinate skill execution:
 
-### Templates
+1. **Orchestrator** (`agents/orchestrator/`) - Coordinates entire pipeline
+2. **Extractor** (`agents/extractor/`) - Mines repository data
+3. **Synthesizer** (`agents/synthesizer/`) - Generates documentation
+4. **Linker** (`agents/linker/`) - Creates navigation structure
+5. **Validator** (`agents/validator/`) - Enforces quality constraints
+6. **Curator** (`agents/curator/`) - Maintains documentation freshness
+7. **Retrieval** (`agents/retrieval/`) - Provides controlled access to docs
 
-All documentation templates in `templates/agentic-structure/`:
-- `AGENTS.md.template` - Primary entry point (≤150 lines)
+**Note**: Agents only coordinate - all intelligence is in skills.
+
+## Quality Guarantees
+
+**Navigation Constraint**:
+- ≤3 hops from AGENTS.md to any information
+- No orphaned documents
+- Clear navigation paths
+
+**Context Budget**:
+- AGENTS.md ≤150 lines
+- Component docs ≤100 lines each
+- Concept docs ≤75 lines each
+- Query responses ≤500 lines total
+
+**Quality Score** (0-100):
+- Coverage: 40 points (≥80% components documented)
+- Freshness: 20 points (updated <90 days)
+- Completeness: 20 points (all required files present)
+- Linkage: 10 points (no broken links)
+- Navigation: 10 points (≤3 hop depth)
+- **Pass threshold**: ≥70/100
+
+## Templates
+
+All documentation uses templates from `templates/agentic-structure/`:
+- `AGENTS.md.template` - Entry point (≤150 lines)
+- `component.md.template` - Component docs (≤100 lines)
+- `concept.md.template` - Concept docs (≤75 lines)
 - `DESIGN.md.template` - Design philosophy
 - `DEVELOPMENT.md.template` - Development setup
 - `TESTING.md.template` - Test strategy
 - `RELIABILITY.md.template` - SLOs and observability
 - `SECURITY.md.template` - Security model
 - `QUALITY_SCORE.md.template` - Quality metrics
-- `component.md.template` - Component docs (≤100 lines)
-- `concept.md.template` - Domain concepts (≤75 lines)
 
-### Utilities
+## How to Use This Repository
 
-**Logging** (`utilities/logging/logger.py`):
+### When User Asks to Generate Documentation
+
+1. **Invoke `/create` skill**:
+   ```python
+   Skill(skill="create-agentic-docs")
+   ```
+
+2. **Follow the skill workflow**:
+   - Phase 1: Extraction (use repo/ and parsing/ skills)
+   - Phase 2: Synthesis (use inference/ and synthesis/ skills)
+   - Phase 3: Linking (use linking/ skills)
+   - Phase 4: Validation (use validation/ skills)
+
+3. **Report results**:
+   - Files created
+   - Quality score achieved
+   - Issues found (if any)
+   - Next steps (validate, evaluate, query)
+
+### When User Asks to Validate Documentation
+
+1. **Invoke `/validate` skill**:
+   ```python
+   Skill(skill="validate-agentic-docs")
+   ```
+
+2. **Run all 8 validation checks**:
+   - Structure, navigation, line budgets, links, coverage, freshness, completeness, quality
+
+3. **Report**:
+   - Overall score (0-100)
+   - Pass/fail per check
+   - Specific issues
+   - Recommendations
+
+### When User Asks to Query Documentation
+
+1. **Invoke `/ask` skill**:
+   ```python
+   Skill(skill="ask-agentic-docs", args="how does the installer work?")
+   ```
+
+2. **Navigate documentation** (≤3 hops):
+   - Start from AGENTS.md
+   - Follow links to relevant docs
+   - Stay within 500 line context budget
+
+3. **Return answer**:
+   - Concise answer
+   - Relevant details
+   - Related links
+   - Navigation path taken
+
+### When User Asks to Evaluate Documentation
+
+1. **Invoke `/evaluate` skill**:
+   ```python
+   Skill(skill="evaluate-agentic-docs")
+   ```
+
+2. **Spawn coding sub-agent** (using Agent tool):
+   - Constrain to `ask-agentic-docs` skill only
+   - Give test scenario
+   - Measure: hops, time, confidence
+
+3. **Run 5 test scenarios**:
+   - New feature, bug fix, refactor, code review, architecture
+
+4. **Report**:
+   - Scenarios passed/failed
+   - Aggregate metrics
+   - Recommendations for improvement
+
+## Optional Configuration
+
+### GitHub Token (Optional)
+
+For higher API rate limits when ingesting GitHub data:
+
+```bash
+cp .env.example .env
+# Add: GH_API_TOKEN=ghp_your_token
+```
+
+Benefits:
+- 5,000 requests/hour (vs 60 without)
+- Access to private repositories
+
+**Get token**: https://github.com/settings/tokens (scopes: `repo`, `read:org`)
+
+### JIRA Access (Optional)
+
+For private JIRA instances, add to `.env`:
+```bash
+JIRA_URL=https://your-jira.com
+JIRA_EMAIL=your@email.com
+JIRA_API_TOKEN=your-token
+```
+
+Public JIRA (issues.redhat.com) needs no authentication.
+
+## Anti-Patterns to Avoid
+
+- ❌ Generating documentation in one pass without extraction → synthesis → linking pipeline
+- ❌ Embedding interpretation in parsing skills (separate extraction from inference)
+- ❌ Skipping validation (always check navigation depth and quality score)
+- ❌ Exceeding line budgets (enforce AGENTS.md ≤150, components ≤100, concepts ≤75)
+- ❌ Creating documentation without cross-links (navigation is critical)
+- ❌ Skipping logging (all operations must be logged via `log-operation` skill)
+- ❌ Ignoring OpenShift patterns (controllers, operators, reconcile loops, CRDs)
+
+## Key Workflows
+
+### Full Documentation Generation
+
+```
+/create
+  ↓
+1. Extraction
+   - list-files: Discover repository structure
+   - extract-go-structs: Parse Go types
+   - extract-kubernetes-crds: Parse CRDs
+   - build-dependency-graph: Build import graph
+   
+2. Synthesis
+   - infer-component-boundary: Detect components
+   - classify-service-role: Determine roles
+   - generate-component-doc: Create component docs
+   - generate-agents-md: Create AGENTS.md
+   
+3. Linking
+   - link-concepts-to-components: Create cross-links
+   
+4. Validation
+   - check-navigation-depth: Verify ≤3 hops
+   - check-quality-score: Calculate score
+   
+Output: Complete agentic documentation
+```
+
+### Incremental Update (Curator)
+
+```
+When code changes detected:
+  ↓
+1. get-git-history: Find changed files
+2. Identify affected components
+3. Re-extract only changed components
+4. Re-synthesize affected docs
+5. Update links
+6. Re-validate
+```
+
+### Query Resolution
+
+```
+/ask "how does X work?"
+  ↓
+1. Read AGENTS.md (hop 0)
+2. Find X in component list (hop 1)
+3. Read component doc for X (hop 2)
+4. Read related concepts if needed (hop 3)
+5. Return answer with navigation path
+```
+
+## Integration with External Systems
+
+### GitHub/JIRA Storage (`integrations/storage/`)
+- Ingest GitHub PRs, issues
+- Extract JIRA references from titles/bodies/commits
+- Fetch JIRA issues
+- Store in SQLite: `~/.agent-knowledge/data.db`
+- See `integrations/storage/README.md`
+
+### Graphify (`integrations/graphify/`)
+- Generate knowledge graphs from documentation
+- Enable graph-based retrieval
+- See `integrations/graphify/README.md`
+
+## Utilities
+
+### Logging (`utilities/logging/logger.py`)
 ```python
 from utilities.logging.logger import get_logger
 
@@ -315,55 +405,29 @@ logger.log_start("operation", "resource")
 logger.log_success("operation", "resource", duration_ms=100)
 ```
 
-**Validation** (`utilities/validation/validator.py`):
+### Validation (`utilities/validation/validator.py`)
 ```python
-from pathlib import Path
 from utilities.validation.validator import NavigationDepthChecker, QualityScoreCalculator
 
-# Check navigation depth
+# Check navigation
 checker = NavigationDepthChecker(Path("AGENTS.md"), max_depth=3)
 result = checker.check(Path("agentic/"))
 
-# Calculate quality score
+# Calculate quality
 calculator = QualityScoreCalculator(Path("."), Path("agentic/"))
 scores = calculator.calculate()
 ```
 
-### Integration with External Systems
+## Documentation
 
-**GitHub & JIRA Storage** (`integrations/storage/`):
-- GitHub GraphQL API for efficient PR/issue ingestion
-- Date range filtering (default: past year)
-- Automatic JIRA reference extraction and correlation
-- Local SQLite database for fast queries
-- See `integrations/storage/README.md`
+- **[README.md](README.md)** - Quick start and overview
+- **[WORKFLOW_EXPLAINED.md](WORKFLOW_EXPLAINED.md)** - Complete workflow explanation
+- **[CORE_SKILLS.md](CORE_SKILLS.md)** - Detailed skill reference
+- **[SYSTEM_OVERVIEW.md](SYSTEM_OVERVIEW.md)** - Complete system reference
+- **[AGENT_KNOWLEDGE_FRAMEWORK.md](AGENT_KNOWLEDGE_FRAMEWORK.md)** - Architecture
+- **[USAGE.md](USAGE.md)** - Usage examples
+- **[CONTRIBUTING.md](CONTRIBUTING.md)** - Contributing guidelines
 
-**Usage**:
-```bash
-# Ingest single repository (last year by default)
-python integrations/storage/ingest.py openshift/installer --jira OCPCLOUD
+---
 
-# Ingest specific date range
-python integrations/storage/ingest.py openshift/installer \
-  --since 2024-01-01 \
-  --until 2024-12-31 \
-  --jira OCPCLOUD
-
-# Ingest last 90 days
-python integrations/storage/ingest.py openshift/installer \
-  --since 90-days-ago \
-  --jira OCPCLOUD
-```
-
-**Graphify**: Generate knowledge graphs
-- See `integrations/graphify/GRAPHIFY_SKILL.md`
-
-## Anti-Patterns to Avoid
-
-- Generating full documentation in one pass (use incremental generation)
-- Embedding interpretation inside parsing skills (separate extraction from inference)
-- Skipping the linking phase (navigation is critical)
-- Producing narrative-heavy docs without structure (enforce templates)
-- Ignoring OpenShift-specific patterns like operators and reconcile loops
-- Skipping logging (all operations must be logged)
-- Exceeding line budgets (AGENTS.md ≤150, components ≤100, concepts ≤75)
+**Ready to use** | **No installation** | **Skill-driven** | **Quality-first**

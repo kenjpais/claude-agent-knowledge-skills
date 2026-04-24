@@ -1,0 +1,6 @@
+# Agent Knowledge System - Core Dependencies
+# No installation required - this is a skill library for Claude Code
+
+# Optional: For custom integrations only
+# PyYAML>=6.0.1
+# python-dotenv>=1.0.0

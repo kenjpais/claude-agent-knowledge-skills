@@ -7,10 +7,16 @@ Fetches PRs, issues within a date range and extracts JIRA references.
 import re
 import sys
 import json
+import os
 import subprocess
 from typing import List, Dict, Set, Optional
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file (project root)
+env_path = Path(__file__).parent.parent.parent / '.env'
+load_dotenv(dotenv_path=env_path)
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -124,12 +130,20 @@ class GitHubGraphQLIngester:
                     value = str(value)
                 cmd.extend(['-f', f'{key}={value}'])
 
+        # Prepare environment with GitHub token from .env file
+        env = os.environ.copy()
+        gh_token = os.getenv('GH_API_TOKEN')
+        if gh_token:
+            env['GITHUB_TOKEN'] = gh_token
+            env['GH_TOKEN'] = gh_token  # gh CLI also checks GH_TOKEN
+
         try:
             result = subprocess.run(
                 cmd,
                 capture_output=True,
                 text=True,
-                check=True
+                check=True,
+                env=env
             )
             response = json.loads(result.stdout)
 
@@ -141,7 +155,13 @@ class GitHubGraphQLIngester:
             return response.get('data', {})
 
         except subprocess.CalledProcessError as e:
-            print(f"GitHub GraphQL API error: {e.stderr}", file=sys.stderr)
+            # Check if it's a retryable error (502, 503, 504)
+            error_msg = e.stderr
+            if 'HTTP 502' in error_msg or 'HTTP 503' in error_msg or 'HTTP 504' in error_msg:
+                print(f"⚠️  GitHub API temporary error: {error_msg}", file=sys.stderr)
+                print("   Retry in a few minutes or check https://www.githubstatus.com", file=sys.stderr)
+            else:
+                print(f"❌ GitHub GraphQL API error: {error_msg}", file=sys.stderr)
             return {}
         except json.JSONDecodeError as e:
             print(f"JSON decode error: {e}", file=sys.stderr)

@@ -2,10 +2,11 @@
 # Central registry for all skills in the agent knowledge system
 
 version: "1.0"
-last_updated: "2026-04-23"
+last_updated: "2026-04-24"
 
 # Skill Categories
 categories:
+  - core          # User-invocable skills (slash commands)
   - repo
   - parsing
   - inference
@@ -13,8 +14,54 @@ categories:
   - linking
   - validation
   - documentation
+  - data-ingestion
+  - knowledge-graph
+  - evaluation
   - openshift
   - monitoring
+
+# Core Skills (User-Invocable via Slash Commands)
+core_skills:
+  - name: create-agentic-docs
+    path: skills/create-agentic-docs/SKILL.md
+    type: core
+    trigger: /create
+    description: Generate complete agentic documentation for a repository
+    agents: [orchestrator, extractor, synthesizer, linker, validator]
+    inputs: [repository_path]
+    outputs: [documentation_directory, quality_score, execution_plan]
+    user_invocable: true
+
+  - name: validate-agentic-docs
+    path: skills/validate-agentic-docs/SKILL.md
+    type: core
+    trigger: /validate
+    description: Validate existing agentic documentation against repository content
+    agents: [validator, curator]
+    inputs: [repository_path]
+    outputs: [validation_report, quality_score, recommendations]
+    user_invocable: true
+
+  - name: ask-agentic-docs
+    path: skills/ask-agentic-docs/SKILL.md
+    type: core
+    trigger: /ask
+    description: Query agentic documentation to retrieve specific information
+    agents: [retrieval]
+    inputs: [query, repository_path]
+    outputs: [answer, related_docs, navigation_path]
+    user_invocable: true
+    max_context: 500
+
+  - name: evaluate-agentic-docs
+    path: skills/evaluate-agentic-docs/SKILL.md
+    type: core
+    trigger: /evaluate
+    description: Evaluate agentic documentation by testing with coding agent simulation
+    agents: [evaluator]
+    inputs: [repository_path, test_scenarios]
+    outputs: [evaluation_report, metrics, recommendations]
+    user_invocable: true
 
 # Repository Access Skills
 repo_skills:
@@ -157,6 +204,48 @@ documentation_skills:
     inputs: [file_path, content, frontmatter, validation_rules, create_backup]
     outputs: [file_path, action, file_hash, line_count, validation_results, warnings]
 
+# Data Ingestion Skills
+data_ingestion_skills:
+  - name: ingest-github-data
+    path: skills/ingest-github-data/SKILL.md
+    type: data-ingestion
+    description: Ingest GitHub repository PRs, issues, and JIRA references into SQLite database
+    inputs: [repository_url, since_date, until_date, pr_limit, issue_limit, jira_project]
+    outputs: [database_path, statistics]
+
+# Knowledge Graph Skills
+knowledge_graph_skills:
+  - name: generate-knowledge-graph
+    path: skills/generate-knowledge-graph/SKILL.md
+    type: knowledge-graph
+    description: Convert ingested data and agentic documentation into queryable knowledge graph
+    inputs: [database_path, agentic_docs_path, graph_name, include_code]
+    outputs: [graph_path, statistics, node_types, relationship_types]
+
+  - name: retrieve-from-graph
+    path: skills/retrieve-from-graph/SKILL.md
+    type: knowledge-graph
+    description: Query knowledge graph to retrieve documentation with ≤3 hop navigation
+    inputs: [graph_path, query_type, query_params, max_hops, include_context, context_limit]
+    outputs: [results, navigation_path, context, metrics]
+    max_hops: 3
+    max_context: 500
+
+# Evaluation Skills
+evaluation_skills:
+  - name: evaluate-agentic-docs
+    path: skills/evaluate-agentic-docs/SKILL.md
+    type: evaluation
+    description: Evaluate documentation quality by testing with coding agent simulation
+    inputs: [repository_path, test_scenarios]
+    outputs: [evaluation_report, aggregate_metrics, recommendations]
+    test_scenarios: 5
+    success_criteria:
+      scenarios_passed: 0.8
+      average_hops: 2.5
+      average_time: 120
+      average_confidence: 80
+
 # Monitoring Skills
 monitoring_skills:
   - name: log-operation
@@ -242,6 +331,18 @@ agent_skill_mappings:
     repo_access:
       - read-file
       - search-code
+    knowledge_graph:
+      - retrieve-from-graph
+    monitoring:
+      - log-operation
+
+  evaluator:
+    evaluation:
+      - evaluate-agentic-docs
+    knowledge_graph:
+      - retrieve-from-graph
+    core:
+      - ask-agentic-docs
     monitoring:
       - log-operation
 
@@ -282,3 +383,23 @@ dependencies:
     requires:
       - generate-agents-md
       - check-navigation-depth
+
+  generate-knowledge-graph:
+    requires:
+      - ingest-github-data
+      - generate-agents-md
+      - generate-component-doc
+
+  retrieve-from-graph:
+    requires:
+      - generate-knowledge-graph
+
+  ask-agentic-docs:
+    optional:
+      - retrieve-from-graph
+
+  evaluate-agentic-docs:
+    requires:
+      - generate-agents-md
+      - generate-knowledge-graph
+      - retrieve-from-graph

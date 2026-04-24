@@ -27,6 +27,7 @@ venv/
 env/
 ENV/
 .venv
+.env
 
 # IDE
 .vscode/
@@ -65,3 +66,12 @@ logs/
 *.temp
 tmp/
 temp/
+
+# Generated Outputs (keep structure, ignore content)
+output/agentic/*/
+output/graphs/*/
+output/databases/*.db
+!output/README.md
+!output/agentic/.gitkeep
+!output/graphs/.gitkeep
+!output/databases/.gitkeep
