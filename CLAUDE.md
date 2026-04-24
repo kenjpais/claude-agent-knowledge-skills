@@ -16,7 +16,7 @@ This repository is a **skill library** for Claude Code containing 40+ skills for
 
 **Location**: `skills/create-agentic-docs/SKILL.md`
 
-**What to do**: When the user types `/create`, invoke this skill using the Skill tool before doing anything else.
+**What to do**: When the user types `/create`, read `skills/create-agentic-docs/SKILL.md` and execute the workflow defined there.
 
 **Usage**:
 ```bash
@@ -49,6 +49,8 @@ This repository is a **skill library** for Claude Code containing 40+ skills for
 
 **Location**: `skills/validate-agentic-docs/SKILL.md`
 
+**What to do**: When the user types `/validate`, read `skills/validate-agentic-docs/SKILL.md` and execute the workflow defined there.
+
 **Usage**:
 ```bash
 # User types in Claude Code:
@@ -69,6 +71,8 @@ This repository is a **skill library** for Claude Code containing 40+ skills for
 ### `/evaluate` - Test with Coding Agent Simulation
 
 **Location**: `skills/evaluate-agentic-docs/SKILL.md`
+
+**What to do**: When the user types `/evaluate`, read `skills/evaluate-agentic-docs/SKILL.md` and execute the workflow defined there.
 
 **Usage**:
 ```bash
@@ -94,6 +98,8 @@ This repository is a **skill library** for Claude Code containing 40+ skills for
 ### `/ask` - Query Documentation
 
 **Location**: `skills/ask-agentic-docs/SKILL.md`
+
+**What to do**: When the user types `/ask`, read `skills/ask-agentic-docs/SKILL.md` and execute the workflow defined there.
 
 **Usage**:
 ```bash
