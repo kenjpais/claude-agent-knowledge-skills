@@ -165,6 +165,119 @@ If a GitHub URL is provided and the repository is not already cloned:
 
 **Skill Used**: `check-quality-score`
 
+### 9. Directory Structure Validation
+
+**Check**: All 12 required subdirectories exist and follow naming conventions
+
+**Required Directories**:
+- ✅ `agentic/design-docs/`
+- ✅ `agentic/design-docs/components/`
+- ✅ `agentic/domain/`
+- ✅ `agentic/domain/concepts/`
+- ✅ `agentic/domain/workflows/`
+- ✅ `agentic/exec-plans/`
+- ✅ `agentic/exec-plans/active/`
+- ✅ `agentic/exec-plans/completed/`
+- ✅ `agentic/product-specs/`
+- ✅ `agentic/decisions/`
+- ✅ `agentic/references/`
+- ✅ `agentic/generated/`
+
+**Naming Convention**: Directories must be lowercase with hyphens (no underscores or spaces).
+
+**Skill Used**: `check-directory-structure`
+
+### 10. File Naming Validation
+
+**Check**: All filenames follow conventions
+
+| Rule | Scope | Pattern |
+|------|-------|---------|
+| Lowercase | All `.md` files (with exemptions) | `[a-z][a-z0-9-]*\.md` |
+| Hyphens not underscores | All `.md` files | `word-word.md` not `word_word.md` |
+| ADR naming | `agentic/decisions/` | `adr-NNNN-title.md` |
+| Concept naming | `agentic/domain/concepts/` | `concept-name.md` |
+| Workflow naming | `agentic/domain/workflows/` | `workflow-name.md` |
+| Exec-plan naming | `agentic/exec-plans/active/` | `feature-name.md` |
+
+**Exempted from lowercase**: `AGENTS.md`, `ARCHITECTURE.md`, `DESIGN.md`, `DEVELOPMENT.md`, `TESTING.md`, `RELIABILITY.md`, `SECURITY.md`, `QUALITY_SCORE.md`
+
+**Skill Used**: `check-file-naming`
+
+### 11. Placeholder & Reference Validation
+
+**Check**: No unreplaced template artifacts
+
+**Detects**:
+- Unreplaced placeholders: `[REPO-NAME]`, `[Component#]`, `[TODO*]`, `[INSERT*]`, `[PLACEHOLDER*]`, `{{placeholder}}`
+- Line numbers in code references: `file.go:42`, `file.go#L42`
+- Absolute paths in links: `[text](/path)` (must use relative paths)
+- External images in AGENTS.md: `![alt](image.png)` (must use ASCII diagrams)
+
+**Skill Used**: `check-placeholders`
+
+### 12. AGENTS.md & ARCHITECTURE.md Content Validation
+
+**Check**: Required sections present, content follows rules
+
+**AGENTS.md must contain** (8 required sections):
+1. Repo description (1-2 sentences)
+2. Quick navigation by intent
+3. Repo structure overview
+4. Component boundaries (ASCII diagram)
+5. Core concepts table
+6. Key invariants
+7. Critical code locations
+8. Build/test commands
+
+**AGENTS.md must NOT contain**: Long prose paragraphs, code blocks > 10 lines, detailed design rationale.
+
+**ARCHITECTURE.md** (if present): Prose ratio must be ≤50% (tables/lists, not narrative). Must contain critical code locations and data flow diagram.
+
+**Skill Used**: `check-agents-md-sections`
+
+### 13. Frontmatter Field Validation
+
+**Check**: Document-type-specific YAML frontmatter fields present
+
+| Document Type | Directory | Required Fields |
+|---|---|---|
+| Exec-plan | `exec-plans/active/`, `exec-plans/completed/` | `status`, `owner`, `created`, `target` |
+| ADR | `decisions/` | `id`, `title`, `date`, `status`, `deciders` |
+| Concept | `domain/concepts/` | `concept`, `type`, `related` |
+| Product spec | `product-specs/` | `feature`, `status`, `owner` |
+| Workflow | `domain/workflows/` | `workflow`, `components`, `related_concepts` |
+| Component | `design-docs/components/` | `component`, `type`, `related` |
+
+**Skill Used**: `check-frontmatter-fields`
+
+### 14. Stale TODO Detection
+
+**Check**: No stale TODO/FIXME/HACK/XXX comments
+
+**Thresholds**:
+- ⚠️ Warning: TODO in file not updated in > 30 days
+- ❌ Error: More than 5 stale TODO files across `agentic/`
+
+**Action**: Move stale items to `agentic/exec-plans/tech-debt-tracker.md` or resolve them.
+
+**Skill Used**: `check-stale-todos`
+
+### 15. Context Budget Validation
+
+**Check**: Standard agent workflows stay within ≤700 lines
+
+**Simulated Workflows**:
+1. Bug Fix (Simple): AGENTS.md → component → concept (3 docs)
+2. Bug Fix (Complex): AGENTS.md → ARCHITECTURE.md → component → 2 concepts → workflow (5-6 docs)
+3. Feature Implementation: AGENTS.md → DESIGN.md → DEVELOPMENT.md → component → 2 concepts (5-6 docs)
+4. Understanding System: AGENTS.md → ARCHITECTURE.md → 3 components → glossary (5-6 docs)
+5. Security Review: AGENTS.md → SECURITY.md → RELIABILITY.md → 2 components (4-5 docs)
+
+**Pass**: All 5 workflows ≤ 700 lines. **Warning**: 1 over. **Fail**: 2+ over.
+
+**Skill Used**: `check-context-budget`
+
 ## Output
 
 ### Validation Report
@@ -213,6 +326,34 @@ If a GitHub URL is provided and the repository is not already cloned:
 ### Completeness (20 points)
 - Score: 20/20 (100%)
 - All docs have required sections
+
+### Directory Structure (Pass/Fail)
+- ✅ 12/12 required directories present
+- ✅ No naming convention violations
+
+### File Naming (Pass/Fail)
+- ✅ All filenames follow conventions
+- ✅ ADR naming patterns valid
+
+### Placeholders & References (Pass/Fail)
+- ✅ No unreplaced placeholders
+- ✅ No line number references
+- ✅ All links use relative paths
+
+### AGENTS.md Sections (Pass/Fail)
+- ✅ 8/8 required sections present
+- ⚠️  ARCHITECTURE.md prose ratio: 55% (limit: 50%)
+
+### Frontmatter Fields (Pass/Fail)
+- ✅ All concept docs have required fields
+- ⚠️  1 ADR missing `deciders` field
+
+### Stale TODOs (Pass/Fail)
+- ✅ 2 stale TODOs (limit: 5)
+
+### Context Budget (Pass/Fail)
+- ✅ All workflows within 700 lines
+- Max: 620 lines (Feature Implementation)
 
 ### Quality Score: 88/100 ✅ PASS
 
@@ -287,13 +428,20 @@ When this skill is invoked:
    - Exit early if no docs found
 
 2. **Run All Validations**
-   - Structure validation
+   - Structure validation (required files)
    - Navigation depth validation
    - Line budget validation
    - Link validation
    - Coverage validation
    - Freshness validation
    - Completeness validation
+   - Directory structure validation
+   - File naming validation
+   - Placeholder & reference validation
+   - AGENTS.md & ARCHITECTURE.md section validation
+   - Frontmatter field validation
+   - Stale TODO detection
+   - Context budget validation
 
 3. **Calculate Quality Score**
    - Sum all category scores
@@ -340,6 +488,10 @@ Validation is successful when:
 - Freshness threshold: 90 days
 - Max navigation depth: 3 hops
 - Line budgets: AGENTS.md 150, components 100, concepts 75
+- Context budget per workflow: 700 lines
+- Stale TODO warning: 30 days
+- Stale TODO error: > 5 stale files
+- ARCHITECTURE.md prose ratio: ≤50%
 
 ## Logging
 
@@ -355,6 +507,13 @@ All validation operations logged to:
 - `validate-line-budgets` - Check document lengths
 - `validate-links` - Check for broken links
 - `check-freshness` - Check documentation staleness
+- `check-directory-structure` - Validate required directories and naming
+- `check-file-naming` - Validate filename conventions
+- `check-placeholders` - Detect unreplaced placeholders, line numbers, absolute paths, images
+- `check-agents-md-sections` - Validate AGENTS.md/ARCHITECTURE.md content
+- `check-frontmatter-fields` - Validate per-type frontmatter requirements
+- `check-stale-todos` - Detect stale TODO/FIXME comments
+- `check-context-budget` - Simulate workflows and verify context budget
 - `read-file` - Read documentation files
 - `get-git-history` - Get file modification times
 

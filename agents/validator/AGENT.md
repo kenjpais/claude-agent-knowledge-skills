@@ -20,6 +20,13 @@ phase: validation
 ### Validation Skills
 - `check-navigation-depth` - Enforce 3-hop constraint
 - `check-quality-score` - Calculate comprehensive quality metrics
+- `check-directory-structure` - Validate required directories and naming conventions
+- `check-file-naming` - Validate filename conventions across document types
+- `check-placeholders` - Detect unreplaced placeholders, line numbers, absolute paths, images
+- `check-agents-md-sections` - Validate AGENTS.md/ARCHITECTURE.md content and sections
+- `check-frontmatter-fields` - Validate per-type YAML frontmatter requirements
+- `check-stale-todos` - Detect stale TODO/FIXME comments
+- `check-context-budget` - Simulate workflows and verify context budget
 
 ### Monitoring
 - `log-operation` - Log validation results
@@ -32,19 +39,30 @@ phase: validation
 ### Phase 1: Structural Validation
 1. Check required files exist:
    - [ ] AGENTS.md at repository root
+   - [ ] ARCHITECTURE.md at repository root
    - [ ] agentic/DESIGN.md
    - [ ] agentic/DEVELOPMENT.md
    - [ ] agentic/TESTING.md
    - [ ] agentic/RELIABILITY.md
    - [ ] agentic/SECURITY.md
    - [ ] agentic/QUALITY_SCORE.md
-2. Check required directories exist:
-   - [ ] agentic/design-docs/
-   - [ ] agentic/design-docs/components/
-   - [ ] agentic/domain/concepts/
-   - [ ] agentic/domain/workflows/
-   - [ ] agentic/exec-plans/
-3. Log structural validation results
+   - [ ] agentic/design-docs/index.md
+   - [ ] agentic/domain/index.md
+   - [ ] agentic/product-specs/index.md
+   - [ ] agentic/decisions/index.md
+   - [ ] agentic/references/index.md
+   - [ ] agentic/design-docs/core-beliefs.md
+   - [ ] agentic/domain/glossary.md
+   - [ ] agentic/exec-plans/template.md
+   - [ ] agentic/exec-plans/tech-debt-tracker.md
+   - [ ] agentic/decisions/adr-template.md
+2. Run `check-directory-structure`:
+   - [ ] All 12 required directories present
+   - [ ] Directory names are lowercase with hyphens
+3. Run `check-file-naming`:
+   - [ ] All filenames follow lowercase/hyphen conventions
+   - [ ] ADR, concept, workflow, exec-plan naming patterns valid
+4. Log structural validation results
 
 ### Phase 2: Navigation Validation
 1. Run `check-navigation-depth`:
@@ -69,15 +87,31 @@ phase: validation
 5. Log link validation results
 
 ### Phase 4: Content Validation
-1. Validate frontmatter:
+1. Run `check-frontmatter-fields`:
    - All docs have required frontmatter
    - Frontmatter YAML is well-formed
-   - Required fields present (title, type, last_updated)
-2. Validate markdown syntax:
+   - Per-type required fields present (exec-plans, ADRs, concepts, product specs, workflows, components)
+2. Run `check-placeholders`:
+   - No unreplaced template placeholders (`[REPO-NAME]`, `[TODO*]`, etc.)
+   - No line numbers in code references (`file.go:42`)
+   - All links use relative paths (no absolute `/path`)
+   - No external images in AGENTS.md (ASCII diagrams only)
+3. Run `check-agents-md-sections`:
+   - AGENTS.md contains all 8 required sections
+   - AGENTS.md has no prohibited content (long prose, large code blocks)
+   - ARCHITECTURE.md prose ratio ≤ 50%
+   - ARCHITECTURE.md has required sections
+4. Run `check-stale-todos`:
+   - Flag TODOs not updated in > 30 days
+   - Error if > 5 stale TODO files
+5. Run `check-context-budget`:
+   - Simulate 5 standard workflows
+   - Each must consume ≤ 700 lines
+6. Validate markdown syntax:
    - Tables formatted correctly
    - Code blocks closed
    - Headings properly nested
-3. Validate confidence scores:
+7. Validate confidence scores:
    - Flag low-confidence inferences (<0.5)
    - Document confidence distribution
 
