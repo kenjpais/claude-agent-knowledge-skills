@@ -28,6 +28,13 @@ phase: validation
 - `check-stale-todos` - Detect stale TODO/FIXME comments
 - `check-context-budget` - Simulate workflows and verify context budget
 
+### Semantic Validation Skills
+- `semantic-validate-adr` - LLM-based ADR quality (13 checks)
+- `semantic-validate-content-grounding` - LLM-based code grounding (6 checks)
+- `semantic-validate-content-quality` - LLM-based content minimalism (9 checks)
+- `semantic-validate-content-consistency` - LLM-based cross-doc consistency (4-7 checks)
+- `semantic-validate-knowledge-graph` - LLM-based graph quality (14 checks)
+
 ### Monitoring
 - `log-operation` - Log validation results
 
@@ -115,7 +122,31 @@ phase: validation
    - Flag low-confidence inferences (<0.5)
    - Document confidence distribution
 
-### Phase 5: Quality Score Calculation
+### Phase 5: Semantic Validation
+1. Run `semantic-validate-adr`:
+   - Validate all ADRs in agentic/decisions/
+   - 13 checks: faithfulness, reasoning, coherence, alternatives, consequences, etc.
+   - Flag fabricated claims (FAIL) and weak reasoning (WARN)
+2. Run `semantic-validate-content-grounding`:
+   - Verify code references exist, concept definitions match code, diagrams reflect structure
+   - Verify AGENTS.md navigation paths serve their intent
+   - 6 checks spanning source accuracy and functional assessment
+3. Run `semantic-validate-content-quality`:
+   - Detect narrative, duplication, prescriptive language, tutorials, token waste
+   - Validate exec-plan goals, codebase alignment, and completeness
+   - 9 checks spanning minimalism and plan quality
+4. Run `semantic-validate-content-consistency`:
+   - Verify glossary-concept alignment, corpus-wide terminology, component-workflow coherence
+   - For OpenShift repos: validate markers, enhancement links, core beliefs
+   - 4-7 checks depending on repo type
+5. Run `semantic-validate-knowledge-graph`:
+   - Verify edge types, node classification, retrieval readiness
+   - Detect missing relationships, redundancy, hallucinations
+   - Simulate 3-5 retrieval queries within 3 hops / 700 lines
+   - 14 checks spanning structure, quality, and retrieval
+6. Log semantic validation results
+
+### Phase 6: Quality Score Calculation
 1. Run `check-quality-score`:
    - **Coverage**: % of components documented
    - **Freshness**: % of docs updated within 90 days
@@ -125,7 +156,7 @@ phase: validation
 2. Calculate overall score (0-100)
 3. Update QUALITY_SCORE.md with results and timestamp
 
-### Phase 6: Feedback Loop
+### Phase 7: Feedback Loop
 1. Check if quality score meets threshold (default: 70/100)
 2. If score < threshold:
    - Identify specific gaps:

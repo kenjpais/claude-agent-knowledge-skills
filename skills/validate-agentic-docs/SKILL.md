@@ -278,6 +278,56 @@ If a GitHub URL is provided and the repository is not already cloned:
 
 **Skill Used**: `check-context-budget`
 
+### 16. Semantic ADR Validation
+
+**Check**: ADR content quality — faithfulness, reasoning, alternatives, coherence (LLM-based, 13 sub-checks)
+
+**Evaluates**: Source faithfulness, reasoning soundness, decision-driver alignment, alternatives analysis quality, consequence completeness, context sufficiency, semantic coherence, decision actionability, terminology consistency, code reference accuracy, scope/granularity, cross-ADR redundancy, tone/objectivity.
+
+**Severity**: Mix of FAIL (faithfulness, coherence, code accuracy) and WARN (reasoning, alternatives, tone).
+
+**Skill Used**: `semantic-validate-adr`
+
+### 17. Semantic Content Grounding Validation
+
+**Check**: Documentation is grounded in actual code and serves its purpose (LLM-based, 6 sub-checks)
+
+**Evaluates**: Code reference accuracy (do paths/functions exist?), concept definition accuracy (match CRDs/types?), component boundary accuracy (diagrams match imports?), navigation path completeness, repo description accuracy, invariants enforcement.
+
+**Severity**: FAIL for code refs, concept defs, invariants. WARN for navigation, description, boundaries.
+
+**Skill Used**: `semantic-validate-content-grounding`
+
+### 18. Semantic Content Quality Validation
+
+**Check**: Content minimalism and execution plan substance (LLM-based, 9 sub-checks)
+
+**Evaluates**: Narrative detection, content duplication across files, prescriptive vs descriptive language, README/docs duplication, unnecessary tutorials, token efficiency, exec-plan goal clarity, plan-codebase alignment, plan completeness.
+
+**Severity**: FAIL for plan-codebase alignment. WARN for all others.
+
+**Skill Used**: `semantic-validate-content-quality`
+
+### 19. Semantic Content Consistency Validation
+
+**Check**: Cross-document semantic consistency (LLM-based, 4-7 sub-checks)
+
+**Evaluates**: Glossary-concept doc alignment, corpus-wide terminology consistency, component-workflow coherence, index file accuracy. For OpenShift repos: marker accuracy, enhancement-ADR linkage, core beliefs relevance.
+
+**Severity**: FAIL for glossary contradictions. WARN for terminology drift, index inaccuracy. SKIP for non-OpenShift checks.
+
+**Skill Used**: `semantic-validate-content-consistency`
+
+### 20. Semantic Knowledge Graph Validation
+
+**Check**: Graph semantic quality and retrieval readiness (LLM-based, 14 sub-checks)
+
+**Evaluates**: Edge type accuracy, node type classification, content-to-graph consistency, label clarity, missing relationships, semantic redundancy, concept coverage, edge plausibility, workflow sequence coherence, progressive disclosure, ADR traceability, cross-document consistency, hallucination detection, retrieval simulation (3-5 queries).
+
+**Severity**: FAIL for edge types, node types, traceability, contradictions, hallucinations. WARN for others.
+
+**Skill Used**: `semantic-validate-knowledge-graph`
+
 ## Output
 
 ### Validation Report
@@ -354,6 +404,26 @@ If a GitHub URL is provided and the repository is not already cloned:
 ### Context Budget (Pass/Fail)
 - ✅ All workflows within 700 lines
 - Max: 620 lines (Feature Implementation)
+
+### Semantic: ADR Quality (13 checks)
+- ✅ 11 passed, 2 warnings
+- ⚠️  ADR-0002: Alternatives Analysis — one alternative appears to be a strawman
+
+### Semantic: Content Grounding (6 checks)
+- ✅ 5 passed, 1 warning
+- ⚠️  Component boundary diagram missing pkg/operator dependency
+
+### Semantic: Content Quality (9 checks)
+- ✅ 8 passed, 1 warning
+- ⚠️  DESIGN.md duplicates README.md setup instructions
+
+### Semantic: Content Consistency (4-7 checks)
+- ✅ 4 passed, 0 warnings
+- ⏭️  3 OpenShift checks skipped (not an OpenShift repo)
+
+### Semantic: Knowledge Graph (14 checks)
+- ✅ 12 passed, 2 warnings
+- ⚠️  2 missing relationships: concept-to-workflow edges
 
 ### Quality Score: 88/100 ✅ PASS
 
@@ -442,6 +512,11 @@ When this skill is invoked:
    - Frontmatter field validation
    - Stale TODO detection
    - Context budget validation
+   - Semantic ADR validation
+   - Semantic content grounding validation
+   - Semantic content quality validation
+   - Semantic content consistency validation
+   - Semantic knowledge graph validation
 
 3. **Calculate Quality Score**
    - Sum all category scores
@@ -514,6 +589,11 @@ All validation operations logged to:
 - `check-frontmatter-fields` - Validate per-type frontmatter requirements
 - `check-stale-todos` - Detect stale TODO/FIXME comments
 - `check-context-budget` - Simulate workflows and verify context budget
+- `semantic-validate-adr` - LLM-based ADR quality validation (13 checks)
+- `semantic-validate-content-grounding` - LLM-based code grounding validation (6 checks)
+- `semantic-validate-content-quality` - LLM-based content minimalism validation (9 checks)
+- `semantic-validate-content-consistency` - LLM-based cross-doc consistency validation (4-7 checks)
+- `semantic-validate-knowledge-graph` - LLM-based graph quality validation (14 checks)
 - `read-file` - Read documentation files
 - `get-git-history` - Get file modification times
 
