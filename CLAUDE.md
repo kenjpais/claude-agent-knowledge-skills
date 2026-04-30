@@ -16,7 +16,7 @@ This repository is a **skill library** for Claude Code containing 40+ skills for
 
 **Location**: `skills/create-agentic-docs/SKILL.md`
 
-**What to do**: When the user types `/create`, read `skills/create-agentic-docs/SKILL.md` and execute the workflow defined there.
+**What to do**: When the user types `/create`, immediately execute the full documentation generation pipeline defined in this skill. Do not just display the skill content — run all phases (Extraction → Synthesis → Linking → Validation) and generate the output files.
 
 **Usage**:
 ```bash
@@ -49,7 +49,7 @@ This repository is a **skill library** for Claude Code containing 40+ skills for
 
 **Location**: `skills/validate-agentic-docs/SKILL.md`
 
-**What to do**: When the user types `/validate`, read `skills/validate-agentic-docs/SKILL.md` and execute the workflow defined there.
+**What to do**: When the user types `/validate`, immediately execute the full validation pipeline defined in this skill. Do not just display the skill content — run all validation checks and report results.
 
 **Usage**:
 ```bash
@@ -72,7 +72,7 @@ This repository is a **skill library** for Claude Code containing 40+ skills for
 
 **Location**: `skills/evaluate-agentic-docs/SKILL.md`
 
-**What to do**: When the user types `/evaluate`, read `skills/evaluate-agentic-docs/SKILL.md` and execute the workflow defined there.
+**What to do**: When the user types `/evaluate`, immediately execute the full evaluation pipeline defined in this skill. Spawn a coding sub-agent and run all test scenarios.
 
 **Usage**:
 ```bash
@@ -99,7 +99,7 @@ This repository is a **skill library** for Claude Code containing 40+ skills for
 
 **Location**: `skills/ask-agentic-docs/SKILL.md`
 
-**What to do**: When the user types `/ask`, read `skills/ask-agentic-docs/SKILL.md` and execute the workflow defined there.
+**What to do**: When the user types `/ask`, immediately execute the query workflow defined in this skill. Load the knowledge graph, resolve the query, and return an answer.
 
 **Usage**:
 ```bash

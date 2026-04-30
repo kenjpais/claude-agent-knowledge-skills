@@ -165,6 +165,169 @@ If a GitHub URL is provided and the repository is not already cloned:
 
 **Skill Used**: `check-quality-score`
 
+### 9. Directory Structure Validation
+
+**Check**: All 12 required subdirectories exist and follow naming conventions
+
+**Required Directories**:
+- ✅ `agentic/design-docs/`
+- ✅ `agentic/design-docs/components/`
+- ✅ `agentic/domain/`
+- ✅ `agentic/domain/concepts/`
+- ✅ `agentic/domain/workflows/`
+- ✅ `agentic/exec-plans/`
+- ✅ `agentic/exec-plans/active/`
+- ✅ `agentic/exec-plans/completed/`
+- ✅ `agentic/product-specs/`
+- ✅ `agentic/decisions/`
+- ✅ `agentic/references/`
+- ✅ `agentic/generated/`
+
+**Naming Convention**: Directories must be lowercase with hyphens (no underscores or spaces).
+
+**Skill Used**: `check-directory-structure`
+
+### 10. File Naming Validation
+
+**Check**: All filenames follow conventions
+
+| Rule | Scope | Pattern |
+|------|-------|---------|
+| Lowercase | All `.md` files (with exemptions) | `[a-z][a-z0-9-]*\.md` |
+| Hyphens not underscores | All `.md` files | `word-word.md` not `word_word.md` |
+| ADR naming | `agentic/decisions/` | `adr-NNNN-title.md` |
+| Concept naming | `agentic/domain/concepts/` | `concept-name.md` |
+| Workflow naming | `agentic/domain/workflows/` | `workflow-name.md` |
+| Exec-plan naming | `agentic/exec-plans/active/` | `feature-name.md` |
+
+**Exempted from lowercase**: `AGENTS.md`, `ARCHITECTURE.md`, `DESIGN.md`, `DEVELOPMENT.md`, `TESTING.md`, `RELIABILITY.md`, `SECURITY.md`, `QUALITY_SCORE.md`
+
+**Skill Used**: `check-file-naming`
+
+### 11. Placeholder & Reference Validation
+
+**Check**: No unreplaced template artifacts
+
+**Detects**:
+- Unreplaced placeholders: `[REPO-NAME]`, `[Component#]`, `[TODO*]`, `[INSERT*]`, `[PLACEHOLDER*]`, `{{placeholder}}`
+- Line numbers in code references: `file.go:42`, `file.go#L42`
+- Absolute paths in links: `[text](/path)` (must use relative paths)
+- External images in AGENTS.md: `![alt](image.png)` (must use ASCII diagrams)
+
+**Skill Used**: `check-placeholders`
+
+### 12. AGENTS.md & ARCHITECTURE.md Content Validation
+
+**Check**: Required sections present, content follows rules
+
+**AGENTS.md must contain** (8 required sections):
+1. Repo description (1-2 sentences)
+2. Quick navigation by intent
+3. Repo structure overview
+4. Component boundaries (ASCII diagram)
+5. Core concepts table
+6. Key invariants
+7. Critical code locations
+8. Build/test commands
+
+**AGENTS.md must NOT contain**: Long prose paragraphs, code blocks > 10 lines, detailed design rationale.
+
+**ARCHITECTURE.md** (if present): Prose ratio must be ≤50% (tables/lists, not narrative). Must contain critical code locations and data flow diagram.
+
+**Skill Used**: `check-agents-md-sections`
+
+### 13. Frontmatter Field Validation
+
+**Check**: Document-type-specific YAML frontmatter fields present
+
+| Document Type | Directory | Required Fields |
+|---|---|---|
+| Exec-plan | `exec-plans/active/`, `exec-plans/completed/` | `status`, `owner`, `created`, `target` |
+| ADR | `decisions/` | `id`, `title`, `date`, `status`, `deciders` |
+| Concept | `domain/concepts/` | `concept`, `type`, `related` |
+| Product spec | `product-specs/` | `feature`, `status`, `owner` |
+| Workflow | `domain/workflows/` | `workflow`, `components`, `related_concepts` |
+| Component | `design-docs/components/` | `component`, `type`, `related` |
+
+**Skill Used**: `check-frontmatter-fields`
+
+### 14. Stale TODO Detection
+
+**Check**: No stale TODO/FIXME/HACK/XXX comments
+
+**Thresholds**:
+- ⚠️ Warning: TODO in file not updated in > 30 days
+- ❌ Error: More than 5 stale TODO files across `agentic/`
+
+**Action**: Move stale items to `agentic/exec-plans/tech-debt-tracker.md` or resolve them.
+
+**Skill Used**: `check-stale-todos`
+
+### 15. Context Budget Validation
+
+**Check**: Standard agent workflows stay within ≤700 lines
+
+**Simulated Workflows**:
+1. Bug Fix (Simple): AGENTS.md → component → concept (3 docs)
+2. Bug Fix (Complex): AGENTS.md → ARCHITECTURE.md → component → 2 concepts → workflow (5-6 docs)
+3. Feature Implementation: AGENTS.md → DESIGN.md → DEVELOPMENT.md → component → 2 concepts (5-6 docs)
+4. Understanding System: AGENTS.md → ARCHITECTURE.md → 3 components → glossary (5-6 docs)
+5. Security Review: AGENTS.md → SECURITY.md → RELIABILITY.md → 2 components (4-5 docs)
+
+**Pass**: All 5 workflows ≤ 700 lines. **Warning**: 1 over. **Fail**: 2+ over.
+
+**Skill Used**: `check-context-budget`
+
+### 16. Semantic ADR Validation
+
+**Check**: ADR content quality — faithfulness, reasoning, alternatives, coherence (LLM-based, 13 sub-checks)
+
+**Evaluates**: Source faithfulness, reasoning soundness, decision-driver alignment, alternatives analysis quality, consequence completeness, context sufficiency, semantic coherence, decision actionability, terminology consistency, code reference accuracy, scope/granularity, cross-ADR redundancy, tone/objectivity.
+
+**Severity**: Mix of FAIL (faithfulness, coherence, code accuracy) and WARN (reasoning, alternatives, tone).
+
+**Skill Used**: `semantic-validate-adr`
+
+### 17. Semantic Content Grounding Validation
+
+**Check**: Documentation is grounded in actual code and serves its purpose (LLM-based, 6 sub-checks)
+
+**Evaluates**: Code reference accuracy (do paths/functions exist?), concept definition accuracy (match CRDs/types?), component boundary accuracy (diagrams match imports?), navigation path completeness, repo description accuracy, invariants enforcement.
+
+**Severity**: FAIL for code refs, concept defs, invariants. WARN for navigation, description, boundaries.
+
+**Skill Used**: `semantic-validate-content-grounding`
+
+### 18. Semantic Content Quality Validation
+
+**Check**: Content minimalism and execution plan substance (LLM-based, 9 sub-checks)
+
+**Evaluates**: Narrative detection, content duplication across files, prescriptive vs descriptive language, README/docs duplication, unnecessary tutorials, token efficiency, exec-plan goal clarity, plan-codebase alignment, plan completeness.
+
+**Severity**: FAIL for plan-codebase alignment. WARN for all others.
+
+**Skill Used**: `semantic-validate-content-quality`
+
+### 19. Semantic Content Consistency Validation
+
+**Check**: Cross-document semantic consistency (LLM-based, 4-7 sub-checks)
+
+**Evaluates**: Glossary-concept doc alignment, corpus-wide terminology consistency, component-workflow coherence, index file accuracy. For OpenShift repos: marker accuracy, enhancement-ADR linkage, core beliefs relevance.
+
+**Severity**: FAIL for glossary contradictions. WARN for terminology drift, index inaccuracy. SKIP for non-OpenShift checks.
+
+**Skill Used**: `semantic-validate-content-consistency`
+
+### 20. Semantic Knowledge Graph Validation
+
+**Check**: Graph semantic quality and retrieval readiness (LLM-based, 14 sub-checks)
+
+**Evaluates**: Edge type accuracy, node type classification, content-to-graph consistency, label clarity, missing relationships, semantic redundancy, concept coverage, edge plausibility, workflow sequence coherence, progressive disclosure, ADR traceability, cross-document consistency, hallucination detection, retrieval simulation (3-5 queries).
+
+**Severity**: FAIL for edge types, node types, traceability, contradictions, hallucinations. WARN for others.
+
+**Skill Used**: `semantic-validate-knowledge-graph`
+
 ## Output
 
 ### Validation Report
@@ -213,6 +376,54 @@ If a GitHub URL is provided and the repository is not already cloned:
 ### Completeness (20 points)
 - Score: 20/20 (100%)
 - All docs have required sections
+
+### Directory Structure (Pass/Fail)
+- ✅ 12/12 required directories present
+- ✅ No naming convention violations
+
+### File Naming (Pass/Fail)
+- ✅ All filenames follow conventions
+- ✅ ADR naming patterns valid
+
+### Placeholders & References (Pass/Fail)
+- ✅ No unreplaced placeholders
+- ✅ No line number references
+- ✅ All links use relative paths
+
+### AGENTS.md Sections (Pass/Fail)
+- ✅ 8/8 required sections present
+- ⚠️  ARCHITECTURE.md prose ratio: 55% (limit: 50%)
+
+### Frontmatter Fields (Pass/Fail)
+- ✅ All concept docs have required fields
+- ⚠️  1 ADR missing `deciders` field
+
+### Stale TODOs (Pass/Fail)
+- ✅ 2 stale TODOs (limit: 5)
+
+### Context Budget (Pass/Fail)
+- ✅ All workflows within 700 lines
+- Max: 620 lines (Feature Implementation)
+
+### Semantic: ADR Quality (13 checks)
+- ✅ 11 passed, 2 warnings
+- ⚠️  ADR-0002: Alternatives Analysis — one alternative appears to be a strawman
+
+### Semantic: Content Grounding (6 checks)
+- ✅ 5 passed, 1 warning
+- ⚠️  Component boundary diagram missing pkg/operator dependency
+
+### Semantic: Content Quality (9 checks)
+- ✅ 8 passed, 1 warning
+- ⚠️  DESIGN.md duplicates README.md setup instructions
+
+### Semantic: Content Consistency (4-7 checks)
+- ✅ 4 passed, 0 warnings
+- ⏭️  3 OpenShift checks skipped (not an OpenShift repo)
+
+### Semantic: Knowledge Graph (14 checks)
+- ✅ 12 passed, 2 warnings
+- ⚠️  2 missing relationships: concept-to-workflow edges
 
 ### Quality Score: 88/100 ✅ PASS
 
@@ -287,13 +498,25 @@ When this skill is invoked:
    - Exit early if no docs found
 
 2. **Run All Validations**
-   - Structure validation
+   - Structure validation (required files)
    - Navigation depth validation
    - Line budget validation
    - Link validation
    - Coverage validation
    - Freshness validation
    - Completeness validation
+   - Directory structure validation
+   - File naming validation
+   - Placeholder & reference validation
+   - AGENTS.md & ARCHITECTURE.md section validation
+   - Frontmatter field validation
+   - Stale TODO detection
+   - Context budget validation
+   - Semantic ADR validation
+   - Semantic content grounding validation
+   - Semantic content quality validation
+   - Semantic content consistency validation
+   - Semantic knowledge graph validation
 
 3. **Calculate Quality Score**
    - Sum all category scores
@@ -340,6 +563,10 @@ Validation is successful when:
 - Freshness threshold: 90 days
 - Max navigation depth: 3 hops
 - Line budgets: AGENTS.md 150, components 100, concepts 75
+- Context budget per workflow: 700 lines
+- Stale TODO warning: 30 days
+- Stale TODO error: > 5 stale files
+- ARCHITECTURE.md prose ratio: ≤50%
 
 ## Logging
 
@@ -355,6 +582,18 @@ All validation operations logged to:
 - `validate-line-budgets` - Check document lengths
 - `validate-links` - Check for broken links
 - `check-freshness` - Check documentation staleness
+- `check-directory-structure` - Validate required directories and naming
+- `check-file-naming` - Validate filename conventions
+- `check-placeholders` - Detect unreplaced placeholders, line numbers, absolute paths, images
+- `check-agents-md-sections` - Validate AGENTS.md/ARCHITECTURE.md content
+- `check-frontmatter-fields` - Validate per-type frontmatter requirements
+- `check-stale-todos` - Detect stale TODO/FIXME comments
+- `check-context-budget` - Simulate workflows and verify context budget
+- `semantic-validate-adr` - LLM-based ADR quality validation (13 checks)
+- `semantic-validate-content-grounding` - LLM-based code grounding validation (6 checks)
+- `semantic-validate-content-quality` - LLM-based content minimalism validation (9 checks)
+- `semantic-validate-content-consistency` - LLM-based cross-doc consistency validation (4-7 checks)
+- `semantic-validate-knowledge-graph` - LLM-based graph quality validation (14 checks)
 - `read-file` - Read documentation files
 - `get-git-history` - Get file modification times
 

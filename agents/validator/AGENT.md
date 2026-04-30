@@ -20,6 +20,20 @@ phase: validation
 ### Validation Skills
 - `check-navigation-depth` - Enforce 3-hop constraint
 - `check-quality-score` - Calculate comprehensive quality metrics
+- `check-directory-structure` - Validate required directories and naming conventions
+- `check-file-naming` - Validate filename conventions across document types
+- `check-placeholders` - Detect unreplaced placeholders, line numbers, absolute paths, images
+- `check-agents-md-sections` - Validate AGENTS.md/ARCHITECTURE.md content and sections
+- `check-frontmatter-fields` - Validate per-type YAML frontmatter requirements
+- `check-stale-todos` - Detect stale TODO/FIXME comments
+- `check-context-budget` - Simulate workflows and verify context budget
+
+### Semantic Validation Skills
+- `semantic-validate-adr` - LLM-based ADR quality (13 checks)
+- `semantic-validate-content-grounding` - LLM-based code grounding (6 checks)
+- `semantic-validate-content-quality` - LLM-based content minimalism (9 checks)
+- `semantic-validate-content-consistency` - LLM-based cross-doc consistency (4-7 checks)
+- `semantic-validate-knowledge-graph` - LLM-based graph quality (14 checks)
 
 ### Monitoring
 - `log-operation` - Log validation results
@@ -32,19 +46,30 @@ phase: validation
 ### Phase 1: Structural Validation
 1. Check required files exist:
    - [ ] AGENTS.md at repository root
+   - [ ] ARCHITECTURE.md at repository root
    - [ ] agentic/DESIGN.md
    - [ ] agentic/DEVELOPMENT.md
    - [ ] agentic/TESTING.md
    - [ ] agentic/RELIABILITY.md
    - [ ] agentic/SECURITY.md
    - [ ] agentic/QUALITY_SCORE.md
-2. Check required directories exist:
-   - [ ] agentic/design-docs/
-   - [ ] agentic/design-docs/components/
-   - [ ] agentic/domain/concepts/
-   - [ ] agentic/domain/workflows/
-   - [ ] agentic/exec-plans/
-3. Log structural validation results
+   - [ ] agentic/design-docs/index.md
+   - [ ] agentic/domain/index.md
+   - [ ] agentic/product-specs/index.md
+   - [ ] agentic/decisions/index.md
+   - [ ] agentic/references/index.md
+   - [ ] agentic/design-docs/core-beliefs.md
+   - [ ] agentic/domain/glossary.md
+   - [ ] agentic/exec-plans/template.md
+   - [ ] agentic/exec-plans/tech-debt-tracker.md
+   - [ ] agentic/decisions/adr-template.md
+2. Run `check-directory-structure`:
+   - [ ] All 12 required directories present
+   - [ ] Directory names are lowercase with hyphens
+3. Run `check-file-naming`:
+   - [ ] All filenames follow lowercase/hyphen conventions
+   - [ ] ADR, concept, workflow, exec-plan naming patterns valid
+4. Log structural validation results
 
 ### Phase 2: Navigation Validation
 1. Run `check-navigation-depth`:
@@ -69,19 +94,59 @@ phase: validation
 5. Log link validation results
 
 ### Phase 4: Content Validation
-1. Validate frontmatter:
+1. Run `check-frontmatter-fields`:
    - All docs have required frontmatter
    - Frontmatter YAML is well-formed
-   - Required fields present (title, type, last_updated)
-2. Validate markdown syntax:
+   - Per-type required fields present (exec-plans, ADRs, concepts, product specs, workflows, components)
+2. Run `check-placeholders`:
+   - No unreplaced template placeholders (`[REPO-NAME]`, `[TODO*]`, etc.)
+   - No line numbers in code references (`file.go:42`)
+   - All links use relative paths (no absolute `/path`)
+   - No external images in AGENTS.md (ASCII diagrams only)
+3. Run `check-agents-md-sections`:
+   - AGENTS.md contains all 8 required sections
+   - AGENTS.md has no prohibited content (long prose, large code blocks)
+   - ARCHITECTURE.md prose ratio ≤ 50%
+   - ARCHITECTURE.md has required sections
+4. Run `check-stale-todos`:
+   - Flag TODOs not updated in > 30 days
+   - Error if > 5 stale TODO files
+5. Run `check-context-budget`:
+   - Simulate 5 standard workflows
+   - Each must consume ≤ 700 lines
+6. Validate markdown syntax:
    - Tables formatted correctly
    - Code blocks closed
    - Headings properly nested
-3. Validate confidence scores:
+7. Validate confidence scores:
    - Flag low-confidence inferences (<0.5)
    - Document confidence distribution
 
-### Phase 5: Quality Score Calculation
+### Phase 5: Semantic Validation
+1. Run `semantic-validate-adr`:
+   - Validate all ADRs in agentic/decisions/
+   - 13 checks: faithfulness, reasoning, coherence, alternatives, consequences, etc.
+   - Flag fabricated claims (FAIL) and weak reasoning (WARN)
+2. Run `semantic-validate-content-grounding`:
+   - Verify code references exist, concept definitions match code, diagrams reflect structure
+   - Verify AGENTS.md navigation paths serve their intent
+   - 6 checks spanning source accuracy and functional assessment
+3. Run `semantic-validate-content-quality`:
+   - Detect narrative, duplication, prescriptive language, tutorials, token waste
+   - Validate exec-plan goals, codebase alignment, and completeness
+   - 9 checks spanning minimalism and plan quality
+4. Run `semantic-validate-content-consistency`:
+   - Verify glossary-concept alignment, corpus-wide terminology, component-workflow coherence
+   - For OpenShift repos: validate markers, enhancement links, core beliefs
+   - 4-7 checks depending on repo type
+5. Run `semantic-validate-knowledge-graph`:
+   - Verify edge types, node classification, retrieval readiness
+   - Detect missing relationships, redundancy, hallucinations
+   - Simulate 3-5 retrieval queries within 3 hops / 700 lines
+   - 14 checks spanning structure, quality, and retrieval
+6. Log semantic validation results
+
+### Phase 6: Quality Score Calculation
 1. Run `check-quality-score`:
    - **Coverage**: % of components documented
    - **Freshness**: % of docs updated within 90 days
@@ -91,7 +156,7 @@ phase: validation
 2. Calculate overall score (0-100)
 3. Update QUALITY_SCORE.md with results and timestamp
 
-### Phase 6: Feedback Loop
+### Phase 7: Feedback Loop
 1. Check if quality score meets threshold (default: 70/100)
 2. If score < threshold:
    - Identify specific gaps:
