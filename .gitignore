@@ -75,3 +75,7 @@ output/databases/*.db
 !output/agentic/.gitkeep
 !output/graphs/.gitkeep
 !output/databases/.gitkeep
+
+# Internal documentation - not for repository
+FINAL_STATUS.md
+REFACTOR_REVIEW.md
